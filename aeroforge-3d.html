@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AeroForge 3D — Drone Video to 3D Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --navy-950:#0B1E3D;
+  --navy-900:#0F2647;
+  --blue-600:#2E6FF2;
+  --blue-500:#4C82FF;
+  --sky-400:#6FA8FF;
+  --cyan-300:#00D4FF;
+  --white:#FFFFFF;
+  --fog-50:#F4F7FB;
+  --fog-100:#E8EEF9;
+  --slate-500:#5B6B85;
+  --slate-700:#31415E;
+  --radius:14px;
+  --shadow-lg: 0 20px 60px rgba(11,30,61,0.25);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:'Inter',sans-serif;
+  color:var(--slate-700);
+  background:var(--fog-50);
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--cyan-300);color:var(--navy-950);}
+
+/* ---------------- LANDING ---------------- */
+#landing{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:var(--navy-950);
+}
+#hero-canvas{
+  position:absolute; inset:0; width:100%; height:100%;
+  display:block;
+}
+#cursor-canvas{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; z-index:5;
+}
+.hero-overlay{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(46,111,242,0.25), transparent 55%),
+    linear-gradient(180deg, rgba(11,30,61,0.55) 0%, rgba(11,30,61,0.85) 70%, rgba(11,30,61,0.97) 100%);
+  z-index:2;
+}
+.landing-content{
+  position:relative; z-index:6;
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  padding:64px 32px;
+  display:grid;
+  grid-template-columns:1.1fr 0.9fr;
+  gap:56px;
+  align-items:center;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  position:absolute; top:32px; left:32px; z-index:7;
+  color:var(--white); font-weight:600; letter-spacing:0.02em;
+}
+.brand-mark{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--blue-600),var(--cyan-300));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px; font-weight:700; color:var(--navy-950);
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--cyan-300); font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+  margin-bottom:18px;
+}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cyan-300);box-shadow:0 0 12px var(--cyan-300);}
+.hero-title{
+  color:var(--white);
+  font-size:clamp(34px,4.4vw,54px);
+  line-height:1.06;
+  font-weight:700;
+  margin:0 0 20px;
+}
+.hero-title span{color:var(--sky-400);}
+.hero-sub{
+  color:#C6D3EC;
+  font-size:17px; line-height:1.6;
+  max-width:520px;
+  margin:0 0 30px;
+}
+.feature-row{display:flex; gap:22px; flex-wrap:wrap;}
+.feature-chip{
+  display:flex; align-items:center; gap:8px;
+  color:#DCE6FA; font-size:13.5px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:9px 14px; border-radius:999px;
+}
+.feature-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan-300);}
+
+/* Auth card */
+.auth-card{
+  background:rgba(244,247,251,0.92);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,0.4);
+  box-shadow:var(--shadow-lg);
+  padding:30px 30px 26px;
+  width:100%;
+  max-width:400px;
+  justify-self:end;
+}
+.tabs{display:flex; background:var(--fog-100); border-radius:10px; padding:4px; margin-bottom:22px;}
+.tab-btn{
+  flex:1; border:none; background:transparent; padding:9px 0;
+  border-radius:8px; font-size:14px; font-weight:600; color:var(--slate-500);
+  transition:all .18s ease;
+}
+.tab-btn.active{background:var(--white); color:var(--navy-950); box-shadow:0 1px 4px rgba(11,30,61,0.12);}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--slate-700); margin-bottom:6px;}
+.field input{
+  width:100%; padding:11px 12px; border-radius:9px;
+  border:1.5px solid #D7E1F2; background:var(--white);
+  font-size:14px; color:var(--navy-950); outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus{border-color:var(--blue-600); box-shadow:0 0 0 3px rgba(46,111,242,0.15);}
+.field-error{font-size:12px; color:#D64545; margin-top:5px; display:none;}
+.row-between{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; margin:2px 0 18px;}
+.remember{display:flex; align-items:center; gap:6px; color:var(--slate-500);}
+.link-btn{background:none;border:none;color:var(--blue-600); font-weight:600; font-size:12.5px; padding:0;}
+.strength{height:4px; border-radius:2px; background:var(--fog-100); margin-top:6px; overflow:hidden;}
+.strength-fill{height:100%; width:0%; background:#D64545; transition:width .2s ease, background .2s ease;}
+.primary-btn{
+  width:100%; padding:12px 0; border:none; border-radius:9px;
+  background:linear-gradient(135deg,var(--blue-600),var(--sky-400));
+  color:var(--white); font-weight:600; font-size:14.5px;
+  box-shadow:0 8px 20px rgba(46,111,242,0.35);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.primary-btn:hover{transform:translateY(-1px); box-shadow:0 10px 24px rgba(46,111,242,0.45);}
+.primary-btn:disabled{opacity:.65; cursor:progress; transform:none;}
+.divider{display:flex; align-items:center; gap:10px; margin:18px 0; color:#9AA9C4; font-size:12px;}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:#E1E9F6;}
+.google-btn{
+  width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:10.5px 0; border-radius:9px; border:1.5px solid #D7E1F2; background:var(--white);
+  font-weight:600; font-size:14px; color:#3C4A63;
+}
+.google-btn:hover{background:#F8FAFF;}
+.terms{font-size:11.5px; color:var(--slate-500); display:flex; gap:7px; align-items:flex-start; margin:14px 0;}
+.switch-hint{text-align:center; font-size:12.5px; color:var(--slate-500); margin-top:16px;}
+.hidden{display:none !important;}
+.checkmark-msg{
+  background:#EAF7EF; border:1px solid #BFE6CB; color:#25743F;
+  font-size:13px; padding:12px; border-radius:9px; margin-bottom:14px; display:none;
+}
+
+/* ---------------- DASHBOARD ---------------- */
+#dashboard{display:none; height:100vh; background:var(--fog-50);}
+.app-shell{display:grid; grid-template-columns:264px 1fr; height:100%;}
+.sidebar{
+  background:var(--navy-950); color:#DCE6FA;
+  display:flex; flex-direction:column; padding:20px 16px;
+}
+.profile-block{
+  display:flex; align-items:center; gap:10px;
+  padding:12px; border-radius:11px; background:rgba(255,255,255,0.05);
+  margin-bottom:18px;
+}
+.avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan-300),var(--blue-600));
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy-950);
+  flex-shrink:0;
+}
+.profile-name{font-size:13.5px; font-weight:600; color:var(--white);}
+.profile-plan{font-size:11px; color:#8FA3C7; font-family:'JetBrains Mono',monospace;}
+.nav-group{display:flex; flex-direction:column; gap:2px; margin-bottom:auto;}
+.nav-item{
+  display:flex; align-items:center; gap:11px;
+  padding:10px 12px; border-radius:9px; font-size:13.5px; color:#B9C7E2;
+  border:none; background:transparent; text-align:left; width:100%;
+}
+.nav-item svg{width:16px;height:16px; flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,0.06); color:var(--white);}
+.nav-item.active{background:rgba(46,111,242,0.25); color:var(--white);}
+.storage-box{
+  margin-top:16px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.05);
+  font-size:11.5px; color:#9FB0CE;
+}
+.storage-bar{height:5px;border-radius:3px;background:rgba(255,255,255,0.1); margin-top:8px; overflow:hidden;}
+.storage-fill{height:100%; width:34%; background:linear-gradient(90deg,var(--blue-600),var(--cyan-300));}
+.logout-item{margin-top:10px; color:#F2A0A0;}
+
+.workspace{display:flex; flex-direction:column; min-width:0;}
+.toolbar{
+  height:56px; display:flex; align-items:center; gap:14px;
+  padding:0 20px; background:var(--white); border-bottom:1px solid var(--fog-100);
+}
+.status-pill{
+  font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:5px 11px;
+  border-radius:999px; background:var(--fog-100); color:var(--slate-500);
+}
+.status-pill.ready{background:#EAF7EF; color:#25743F;}
+.toolbar-btn{
+  padding:8px 14px; border-radius:8px; border:1.5px solid #E1E9F6; background:var(--white);
+  font-size:13px; font-weight:600; color:var(--navy-950);
+}
+.toolbar-btn.primary{background:var(--blue-600); border-color:var(--blue-600); color:#fff;}
+.toolbar-spacer{flex:1;}
+.viewmode-group{display:flex; background:var(--fog-100); border-radius:8px; padding:3px; gap:2px;}
+.viewmode-btn{padding:6px 11px; border:none; background:transparent; border-radius:6px; font-size:12px; font-weight:600; color:var(--slate-500);}
+.viewmode-btn.active{background:var(--white); color:var(--navy-950); box-shadow:0 1px 3px rgba(11,30,61,.15);}
+
+.studio{flex:1; display:grid; grid-template-columns:1fr 260px; min-height:0;}
+.viewport-wrap{position:relative; background:
+  radial-gradient(ellipse at 50% 30%, #16294A 0%, #0B1E3D 70%);
+}
+#viewer-canvas{width:100%; height:100%; display:block;}
+.viewport-hint{
+  position:absolute; bottom:14px; left:14px; color:#8FA3C7; font-size:11px;
+  font-family:'JetBrains Mono',monospace; background:rgba(11,30,61,0.5); padding:6px 10px; border-radius:7px;
+}
+.axis-badge{
+  position:absolute; top:14px; right:14px; color:#8FA3C7; font-size:10.5px;
+  font-family:'JetBrains Mono',monospace;
+}
+.empty-state{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; text-align:center; padding:20px;
+}
+.empty-state h3{color:var(--white); margin:0; font-size:19px;}
+.empty-state p{color:#9FB0CE; font-size:13.5px; max-width:320px; margin:0;}
+.import-drop{
+  border:1.5px dashed rgba(255,255,255,0.25); border-radius:12px; padding:26px 34px;
+  color:#B9C7E2; font-size:13px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+}
+.import-drop:hover{border-color:var(--cyan-300); background:rgba(0,212,255,0.05);}
+
+.pipeline-panel{
+  position:absolute; left:14px; top:14px; width:280px;
+  background:rgba(15,38,71,0.9); border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px; padding:14px; display:none;
+}
+.pipeline-title{color:var(--white); font-size:12.5px; font-weight:600; margin-bottom:10px;}
+.stage{display:flex; align-items:center; gap:9px; padding:6px 0; font-size:12px; color:#8FA3C7;}
+.stage .dot{width:8px;height:8px;border-radius:50%; border:1.5px solid #4A5C7F; flex-shrink:0;}
+.stage.done .dot{background:var(--cyan-300); border-color:var(--cyan-300);}
+.stage.done{color:#DCE6FA;}
+.stage.active .dot{background:var(--blue-600); border-color:var(--blue-600); box-shadow:0 0 8px var(--blue-600);}
+.stage.active{color:var(--white);}
+.pipeline-progress{height:4px; border-radius:2px; background:rgba(255,255,255,0.1); margin-top:10px; overflow:hidden;}
+.pipeline-progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--blue-600),var(--cyan-300)); transition:width .3s ease;}
+
+.inspector{
+  background:var(--white); border-left:1px solid var(--fog-100);
+  padding:16px; overflow-y:auto;
+}
+.inspector h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate-500); margin:0 0 10px;}
+.outliner-item{
+  padding:7px 9px; border-radius:7px; font-size:12.5px; color:var(--slate-700);
+  display:flex; align-items:center; gap:7px; margin-bottom:2px;
+}
+.outliner-item.sel{background:var(--fog-100); font-weight:600; color:var(--navy-950);}
+.stat-row{display:flex; justify-content:space-between; font-size:12px; padding:5px 0; border-bottom:1px solid var(--fog-100); color:var(--slate-500);}
+.stat-row span:last-child{font-family:'JetBrains Mono',monospace; color:var(--navy-950);}
+.transform-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px;}
+.transform-grid input{
+  width:100%; padding:6px 7px; border-radius:6px; border:1px solid #E1E9F6; font-size:11.5px;
+  font-family:'JetBrains Mono',monospace; text-align:center;
+}
+.section-gap{margin-top:20px;}
+
+@media (max-width:900px){
+  .landing-content{grid-template-columns:1fr; padding:100px 20px 40px;}
+  .auth-card{justify-self:stretch; max-width:none;}
+  .app-shell{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .studio{grid-template-columns:1fr;}
+  .inspector{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING / AUTH ================= -->
+<section id="landing">
+  <canvas id="hero-canvas"></canvas>
+  <canvas id="cursor-canvas"></canvas>
+  <div class="hero-overlay"></div>
+
+  <div class="brand"><div class="brand-mark">A3D</div>AeroForge 3D</div>
+
+  <div class="landing-content">
+    <div>
+      <div class="eyebrow">Single-pass reconstruction</div>
+      <h1 class="hero-title">One drone flight.<br>One accurate <span>3D model.</span></h1>
+      <p class="hero-sub">AeroForge 3D turns a single MP4 flyover into a camera-accurate, textured 3D model — frame extraction, pose estimation, meshing and texturing, all in one pipeline. No second flight, no manual alignment.</p>
+      <div class="feature-row">
+        <div class="feature-chip"><span class="dot"></span>Single pass, no re-flights</div>
+        <div class="feature-chip"><span class="dot"></span>Camera-accurate reconstruction</div>
+        <div class="feature-chip"><span class="dot"></span>Export to GLB / OBJ / FBX</div>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login">Log In</button>
+        <button class="tab-btn" data-tab="register">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="login-form">
+        <div class="field">
+          <label for="li-email">Email</label>
+          <input id="li-email" type="email" placeholder="you@company.com" required>
+        </div>
+        <div class="field">
+          <label for="li-pass">Password</label>
+          <input id="li-pass" type="password" placeholder="••••••••" required>
+        </div>
+        <div class="row-between">
+          <label class="remember"><input type="checkbox" checked style="margin:0;"> Remember me</label>
+          <button type="button" class="link-btn" id="forgot-link">Forgot password?</button>
+        </div>
+        <button type="submit" class="primary-btn" id="login-submit">Log in</button>
+        <div class="divider">or continue with</div>
+        <button type="button" class="google-btn" id="google-login">
+          <svg width="17" height="17" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.29-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="register-form" class="hidden">
+        <div class="field">
+          <label for="re-name">Full name</label>
+          <input id="re-name" type="text" placeholder="Jordan Lee" required>
+        </div>
+        <div class="field">
+          <label for="re-email">Email</label>
+          <input id="re-email" type="email" placeholder="you@company.com" required>
+        </div>
+        <div class="field">
+          <label for="re-pass">Password</label>
+          <input id="re-pass" type="password" placeholder="Create a password" required>
+          <div class="strength"><div class="strength-fill" id="strength-fill"></div></div>
+        </div>
+        <div class="field">
+          <label for="re-pass2">Confirm password</label>
+          <input id="re-pass2" type="password" placeholder="Repeat password" required>
+          <div class="field-error" id="pw-mismatch">Passwords don't match.</div>
+        </div>
+        <div class="terms">
+          <input type="checkbox" required style="margin-top:2px;">
+          <span>I agree to the Terms of Service and Privacy Policy.</span>
+        </div>
+        <button type="submit" class="primary-btn">Create account</button>
+        <div class="divider">or continue with</div>
+        <button type="button" class="google-btn" id="google-register">
+          <svg width="17" height="17" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.29-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+      </form>
+
+      <!-- FORGOT PASSWORD -->
+      <form id="forgot-form" class="hidden">
+        <p style="font-size:13px; color:var(--slate-500); margin:0 0 16px;">Enter the email on your account and we'll send a reset link.</p>
+        <div class="checkmark-msg" id="forgot-sent">Check your inbox — a reset link is on its way.</div>
+        <div class="field">
+          <label for="fg-email">Email</label>
+          <input id="fg-email" type="email" placeholder="you@company.com" required>
+        </div>
+        <button type="submit" class="primary-btn">Send reset link</button>
+        <div class="switch-hint"><button type="button" class="link-btn" id="back-to-login">Back to log in</button></div>
+      </form>
+
+      <div class="switch-hint" id="switch-hint">Don't have an account? <button type="button" class="link-btn" id="go-register">Sign up</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section id="dashboard">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="profile-block">
+        <div class="avatar" id="dash-avatar">J</div>
+        <div>
+          <div class="profile-name" id="dash-name">Jordan Lee</div>
+          <div class="profile-plan">PRO PLAN</div>
+        </div>
+      </div>
+      <div class="nav-group">
+        <button class="nav-item active">◆ Projects</button>
+        <button class="nav-item" id="nav-import">▲ Import Video</button>
+        <button class="nav-item">◈ My Models</button>
+        <button class="nav-item">◷ Processing Jobs</button>
+        <button class="nav-item">▽ Export History</button>
+        <button class="nav-item">⚙ Settings</button>
+      </div>
+      <div class="storage-box">
+        <div style="display:flex; justify-content:space-between;"><span>Storage</span><span class="mono">34.2 / 100 GB</span></div>
+        <div class="storage-bar"><div class="storage-fill"></div></div>
+      </div>
+      <button class="nav-item logout-item" id="logout-btn">⏻ Log out</button>
+    </aside>
+
+    <div class="workspace">
+      <div class="toolbar">
+        <button class="toolbar-btn primary" id="import-btn">↑ Import MP4</button>
+        <input type="file" id="file-input" accept="video/mp4" class="hidden">
+        <span id="project-name" style="font-weight:600; font-size:13.5px; color:var(--navy-950);">Untitled Project</span>
+        <span class="status-pill" id="status-pill">No project loaded</span>
+        <div class="toolbar-spacer"></div>
+        <div class="viewmode-group">
+          <button class="viewmode-btn active" data-mode="solid">Solid</button>
+          <button class="viewmode-btn" data-mode="wireframe">Wireframe</button>
+          <button class="viewmode-btn" data-mode="points">Point Cloud</button>
+        </div>
+        <button class="toolbar-btn">Export ▾</button>
+      </div>
+
+      <div class="studio">
+        <div class="viewport-wrap">
+          <canvas id="viewer-canvas"></canvas>
+          <div class="axis-badge">X&nbsp;&nbsp;Y&nbsp;&nbsp;Z</div>
+          <div class="viewport-hint">drag: orbit · scroll: zoom · right-drag: pan</div>
+
+          <div class="empty-state" id="empty-state">
+            <h3>Import a drone flyover to generate your first model</h3>
+            <p>Drop a single MP4 pass here. AeroForge extracts frames, estimates camera poses, and builds a textured mesh automatically.</p>
+            <div class="import-drop" id="import-drop">Drag & drop MP4, or click Import MP4 above</div>
+          </div>
+
+          <div class="pipeline-panel" id="pipeline-panel">
+            <div class="pipeline-title">Reconstruction pipeline</div>
+            <div class="stage" data-stage="0"><span class="dot"></span>Extracting frames</div>
+            <div class="stage" data-stage="1"><span class="dot"></span>Estimating camera poses</div>
+            <div class="stage" data-stage="2"><span class="dot"></span>Building point cloud</div>
+            <div class="stage" data-stage="3"><span class="dot"></span>Meshing surface</div>
+            <div class="stage" data-stage="4"><span class="dot"></span>Baking textures</div>
+            <div class="pipeline-progress"><div class="pipeline-progress-fill" id="pipeline-progress-fill"></div></div>
+          </div>
+        </div>
+
+        <aside class="inspector">
+          <h4>Outliner</h4>
+          <div class="outliner-item sel">◆ Reconstructed_Mesh</div>
+          <div class="outliner-item">◇ Camera_Path (42 poses)</div>
+          <div class="outliner-item">◇ Point_Cloud_Source</div>
+
+          <div class="section-gap">
+            <h4>Mesh stats</h4>
+            <div class="stat-row"><span>Vertices</span><span id="stat-verts">—</span></div>
+            <div class="stat-row"><span>Faces</span><span id="stat-faces">—</span></div>
+            <div class="stat-row"><span>Texture</span><span>2048×2048</span></div>
+            <div class="stat-row"><span>File size</span><span id="stat-size">—</span></div>
+          </div>
+
+          <div class="section-gap">
+            <h4>Transform</h4>
+            <div class="mono" style="font-size:11px; color:var(--slate-500);">Position</div>
+            <div class="transform-grid"><input value="0.00"><input value="0.00"><input value="0.00"></div>
+            <div class="mono" style="font-size:11px; color:var(--slate-500); margin-top:8px;">Rotation</div>
+            <div class="transform-grid"><input value="0.00"><input value="0.00"><input value="0.00"></div>
+            <div class="mono" style="font-size:11px; color:var(--slate-500); margin-top:8px;">Scale</div>
+            <div class="transform-grid"><input value="1.00"><input value="1.00"><input value="1.00"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ============ HERO CANVAS: point-cloud assembling into a wireframe drone/mesh ============ */
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR = Math.min(window.devicePixelRatio||1, 2);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    W = canvas.width = window.innerWidth * DPR;
+    H = canvas.height = window.innerHeight * DPR;
+    canvas.style.width = window.innerWidth+'px';
+    canvas.style.height = window.innerHeight+'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Build target shape: wireframe icosphere-ish silhouette of terrain + a simple "object" mesh
+  const N = 260;
+  const points = [];
+  for(let i=0;i<N;i++){
+    const cx = window.innerWidth*0.62, cy = window.innerHeight*0.5;
+    const t = i/N * Math.PI * 2;
+    const layer = i % 5;
+    const r = 130 + layer*46 + Math.sin(t*3)*18;
+    const tx = cx + Math.cos(t)*r*1.4;
+    const ty = cy + Math.sin(t)*r*0.7 - layer*10;
+    points.push({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      tx, ty,
+      z: Math.random(),
+      vx:0, vy:0
+    });
+  }
+
+  let mouse = {x:-9999,y:-9999};
+  window.addEventListener('mousemove', e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
+
+  let progress = 0;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    progress = Math.min(1, progress + 0.006);
+    ctx.save();
+    ctx.scale(DPR,DPR);
+
+    // connective wireframe lines between near points once mostly assembled
+    if(progress > 0.5){
+      ctx.strokeStyle = `rgba(111,168,255,${(progress-0.5)*0.5})`;
+      ctx.lineWidth = 0.6;
+      for(let i=0;i<points.length;i++){
+        for(let j=i+1;j<points.length;j++){
+          const p1=points[i], p2=points[j];
+          const dx=p1.tx-p2.tx, dy=p1.ty-p2.ty;
+          if(dx*dx+dy*dy < 2600 && Math.random()<0.15){
+            ctx.beginPath();
+            ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    for(const p of points){
+      const ease = 1 - Math.pow(1-progress, 3);
+      let gx = p.x + (p.tx - p.x) * ease * 0.04;
+      let gy = p.y + (p.ty - p.y) * ease * 0.04;
+
+      if(!reduced){
+        const dx = gx - mouse.x, dy = gy - mouse.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist < 90){
+          const force = (90-dist)/90;
+          gx += (dx/dist)*force*14;
+          gy += (dy/dist)*force*14;
+        }
+      }
+      p.x = gx; p.y = gy;
+
+      const size = 1.1 + p.z*1.8;
+      ctx.beginPath();
+      ctx.fillStyle = p.z > 0.7 ? 'rgba(0,212,255,0.85)' : 'rgba(111,168,255,0.7)';
+      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ============ CURSOR TRAIL (hero only) ============ */
+(function(){
+  const canvas = document.getElementById('cursor-canvas');
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H;
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  if(reduced) return;
+  let trail = [];
+  window.addEventListener('mousemove', e=>{
+    trail.push({x:e.clientX,y:e.clientY,life:1});
+    if(trail.length>28) trail.shift();
+  });
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    trail.forEach((t,i)=>{
+      t.life -= 0.035;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(0,212,255,${Math.max(t.life,0)*0.5})`;
+      ctx.arc(t.x,t.y,2.2,0,Math.PI*2);
+      ctx.fill();
+    });
+    trail = trail.filter(t=>t.life>0);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ============ AUTH TABS & FORMS ============ */
+(function(){
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const forgotForm = document.getElementById('forgot-form');
+  const tabs = document.querySelectorAll('.tab-btn');
+  const switchHint = document.getElementById('switch-hint');
+
+  function showForm(name){
+    loginForm.classList.toggle('hidden', name!=='login');
+    registerForm.classList.toggle('hidden', name!=='register');
+    forgotForm.classList.toggle('hidden', name!=='forgot');
+    switchHint.classList.toggle('hidden', name==='forgot');
+    document.querySelectorAll('.tabs')[0].classList.toggle('hidden', name==='forgot');
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  }
+
+  tabs.forEach(t=>t.addEventListener('click', ()=>showForm(t.dataset.tab)));
+  document.getElementById('go-register').addEventListener('click', ()=>showForm('register'));
+  document.getElementById('forgot-link').addEventListener('click', ()=>showForm('forgot'));
+  document.getElementById('back-to-login').addEventListener('click', ()=>showForm('login'));
+
+  // password strength
+  document.getElementById('re-pass').addEventListener('input', e=>{
+    const v = e.target.value;
+    let score = 0;
+    if(v.length>=8) score++;
+    if(/[A-Z]/.test(v)) score++;
+    if(/[0-9]/.test(v)) score++;
+    if(/[^A-Za-z0-9]/.test(v)) score++;
+    const fill = document.getElementById('strength-fill');
+    const pct = [0,25,55,80,100][score];
+    fill.style.width = pct+'%';
+    fill.style.background = pct<50 ? '#D64545' : pct<80 ? '#E0A72E' : '#25A25A';
+  });
+
+  registerForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const p1=document.getElementById('re-pass').value, p2=document.getElementById('re-pass2').value;
+    const err=document.getElementById('pw-mismatch');
+    if(p1!==p2){ err.style.display='block'; return; }
+    err.style.display='none';
+    const name = document.getElementById('re-name').value || 'New User';
+    enterDashboard(name);
+  });
+
+  loginForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const btn = document.getElementById('login-submit');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    setTimeout(()=>{
+      const email = document.getElementById('li-email').value || 'jordan@aeroforge.io';
+      enterDashboard(email.split('@')[0]);
+    }, 700);
+  });
+
+  document.getElementById('google-login').addEventListener('click', ()=>enterDashboard('Jordan Lee'));
+  document.getElementById('google-register').addEventListener('click', ()=>enterDashboard('Jordan Lee'));
+
+  forgotForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    document.getElementById('forgot-sent').style.display='block';
+  });
+
+  function enterDashboard(name){
+    document.getElementById('landing').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    document.getElementById('dash-name').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+    document.getElementById('dash-avatar').textContent = name.charAt(0).toUpperCase();
+    initViewer();
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', ()=>{
+    document.getElementById('dashboard').style.display='none';
+    document.getElementById('landing').style.display='flex';
+  });
+})();
+
+/* ============ THREE.JS VIEWER + IMPORT PIPELINE SIMULATION ============ */
+let viewerInitialized = false;
+function initViewer(){
+  if(viewerInitialized) return;
+  viewerInitialized = true;
+
+  const canvas = document.getElementById('viewer-canvas');
+  const wrap = canvas.parentElement;
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(4.5,3,5.5);
+
+  function resize(){
+    const w = wrap.clientWidth, h = wrap.clientHeight;
+    renderer.setSize(w,h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // lighting: studio three-point
+  scene.add(new THREE.AmbientLight(0x6fa8ff, 0.4));
+  const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(5,6,4); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x2e6ff2, 0.5); fill.position.set(-5,2,-3); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0x00d4ff, 0.6); rim.position.set(0,-4,-6); scene.add(rim);
+
+  // grid floor
+  const grid = new THREE.GridHelper(14, 28, 0x2e6ff2, 0x1a2f52);
+  grid.position.y = -1.4;
+  scene.add(grid);
+
+  // "reconstructed" mesh — procedurally displaced icosahedron to read as a scanned object
+  const geo = new THREE.IcosahedronGeometry(1.6, 4);
+  const pos = geo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const v = new THREE.Vector3(pos.getX(i),pos.getY(i),pos.getZ(i));
+    const n = v.clone().normalize();
+    const noise = (Math.sin(v.x*3.1)+Math.cos(v.y*2.7)+Math.sin(v.z*3.6))*0.09;
+    v.addScaledVector(n, noise);
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  geo.computeVertexNormals();
+
+  const solidMat = new THREE.MeshStandardMaterial({color:0x6fa8ff, roughness:0.45, metalness:0.15, flatShading:false});
+  const wireMat = new THREE.MeshBasicMaterial({color:0x00d4ff, wireframe:true});
+  const mesh = new THREE.Mesh(geo, solidMat);
+  scene.add(mesh);
+
+  // point cloud representation
+  const ptsGeo = new THREE.BufferGeometry();
+  ptsGeo.setAttribute('position', pos.clone());
+  const ptsMat = new THREE.PointsMaterial({color:0x00d4ff, size:0.03});
+  const points = new THREE.Points(ptsGeo, ptsMat);
+  points.visible = false;
+  scene.add(points);
+
+  document.getElementById('stat-verts').textContent = pos.count.toLocaleString();
+  document.getElementById('stat-faces').textContent = (geo.index ? geo.index.count/3 : pos.count/3).toLocaleString();
+  document.getElementById('stat-size').textContent = '18.4 MB';
+
+  // manual orbit controls
+  let rotX=0.3, rotY=0.5, dist=6.5, dragging=false, panMode=false, lastX=0, lastY=0;
+  let panX=0, panY=0;
+  canvas.addEventListener('mousedown', e=>{ dragging=true; panMode = e.button===2; lastX=e.clientX; lastY=e.clientY; });
+  window.addEventListener('mouseup', ()=>dragging=false);
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    lastX=e.clientX; lastY=e.clientY;
+    if(panMode){ panX -= dx*0.005; panY += dy*0.005; }
+    else { rotY += dx*0.008; rotX = Math.max(-1.2, Math.min(1.2, rotX + dy*0.008)); }
+  });
+  canvas.addEventListener('contextmenu', e=>e.preventDefault());
+  canvas.addEventListener('wheel', e=>{
+    dist = Math.max(2.5, Math.min(14, dist + e.deltaY*0.004));
+    e.preventDefault();
+  }, {passive:false});
+
+  function animate(){
+    requestAnimationFrame(animate);
+    camera.position.x = Math.sin(rotY)*Math.cos(rotX)*dist + panX;
+    camera.position.y = Math.sin(rotX)*dist + panY + 1;
+    camera.position.z = Math.cos(rotY)*Math.cos(rotX)*dist;
+    camera.lookAt(panX, panY, 0);
+    mesh.rotation.y += 0.0015;
+    points.rotation.y = mesh.rotation.y;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // view mode toggle
+  document.querySelectorAll('.viewmode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.viewmode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      mesh.visible = mode!=='points';
+      points.visible = mode==='points';
+      mesh.material = mode==='wireframe' ? wireMat : solidMat;
+    });
+  });
+
+  /* ---- import / pipeline simulation ---- */
+  const fileInput = document.getElementById('file-input');
+  const importBtn = document.getElementById('import-btn');
+  const navImport = document.getElementById('nav-import');
+  const importDrop = document.getElementById('import-drop');
+  const emptyState = document.getElementById('empty-state');
+  const pipelinePanel = document.getElementById('pipeline-panel');
+  const progressFill = document.getElementById('pipeline-progress-fill');
+  const statusPill = document.getElementById('status-pill');
+  const projectName = document.getElementById('project-name');
+
+  [importBtn, navImport, importDrop].forEach(el=>el.addEventListener('click', ()=>fileInput.click()));
+  fileInput.addEventListener('change', ()=>{
+    if(fileInput.files[0]) runPipeline(fileInput.files[0].name);
+  });
+
+  mesh.scale.setScalar(0.001); // hidden until "reconstructed"
+
+  function runPipeline(filename){
+    emptyState.style.display='none';
+    pipelinePanel.style.display='block';
+    projectName.textContent = filename.replace(/\.[^/.]+$/,'');
+    statusPill.textContent = 'Extracting frames';
+    statusPill.classList.remove('ready');
+    const stages = document.querySelectorAll('.stage');
+    stages.forEach(s=>s.classList.remove('done','active'));
+    let stageLabels = ['Extracting frames','Estimating camera poses','Building point cloud','Meshing surface','Baking textures'];
+    let i=0;
+    function nextStage(){
+      if(i>0) stages[i-1].classList.add('done');
+      if(i<stages.length){
+        stages[i].classList.add('active');
+        statusPill.textContent = stageLabels[i];
+        progressFill.style.width = ((i+1)/stages.length*100)+'%';
+        i++;
+        setTimeout(nextStage, 700+Math.random()*500);
+      } else {
+        stages[stages.length-1].classList.remove('active');
+        stages[stages.length-1].classList.add('done');
+        statusPill.textContent = 'Ready';
+        statusPill.classList.add('ready');
+        pipelinePanel.style.display='none';
+        growMesh();
+      }
+    }
+    nextStage();
+  }
+
+  function growMesh(){
+    let s=0.001;
+    function step(){
+      s = Math.min(1, s+0.06);
+      mesh.scale.setScalar(s);
+      points.scale.setScalar(s);
+      if(s<1) requestAnimationFrame(step);
+    }
+    step();
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,3500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Healthy Living Hub | Evidence-Based Nutrition & Safe Exercise</title>
+  
+  <!-- SEO & Social Meta Tags -->
+  <meta name="description" content="Healthy Living Hub is an accessible, evidence-based wellness platform created by Sanskruti Vivek Talmale, Shubham Raju Wankhede, and Samiksha Sandip Taware. Generate personalized nutrition charts, safe exercise plans, and lasting healthy habits.">
+  <meta name="keywords" content="nutrition chart, exercise planner, evidence-based nutrition, WHO physical activity guidelines, healthy eating plate, Indian meal plans, meal prep, healthy living hub">
+  <meta name="author" content="Sanskruti Vivek Talmale, Shubham Raju Wankhede, Samiksha Sandip Taware">
+  <meta property="og:title" content="Healthy Living Hub | Small Daily Choices, Lifelong Health">
+  <meta property="og:description" content="Build an evidence-based nutrition chart, discover adaptable exercises that fit your lifestyle, and build practical daily wellness habits.">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts: Outfit (Headings) and Plus Jakarta Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              deep: '#14532d',
+              green: '#166534',
+              softGreen: '#dcfce7',
+              teal: '#0f766e',
+              softTeal: '#ccfbf1',
+              amber: '#d97706',
+              orange: '#ea580c',
+              softOrange: '#ffedd5',
+              charcoal: '#1e293b',
+              muted: '#475569',
+              lightBg: '#f8fafc',
+              cardBg: '#ffffff',
+              border: '#e2e8f0'
+            }
+          },
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- External Styles & Data -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="data.js"></script>
+
+  <!-- React 18, ReactDOM, and Babel Standalone -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-brand-lightBg text-brand-charcoal min-h-screen flex flex-col antialiased selection:bg-brand-softTeal selection:text-brand-teal">
+  
+  <!-- Root Container for React App -->
+  <div id="root">
+    <!-- Non-JS Fallback -->
+    <noscript>
+      <div class="p-8 text-center text-red-600 bg-red-50 max-w-xl mx-auto my-12 rounded-xl border border-red-200">
+        <h2 class="text-xl font-bold mb-2">JavaScript Required</h2>
+        <p>Healthy Living Hub requires JavaScript to generate personalized nutrition charts and interactive exercise routines. Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+  </div>
+
+  <!-- Main React Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+    const DATA = window.HLH_DATA;
+
+    // --- REUSABLE SVG ICONS ---
+    const IconHeart = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>;
+    const IconApple = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2a4 4 0 00-4 4c0 .3.03.6.1.9C5.8 7.3 4 9.4 4 12c0 4.4 3.6 8 8 8s8-3.6 8-8c0-2.6-1.8-4.7-4.1-5.1.07-.3.1-.6.1-.9a4 4 0 00-4-4z"/></svg>;
+    const IconActivity = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>;
+    const IconCheck = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>;
+    const IconAlert = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>;
+    const IconPrint = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>;
+    const IconUser = () => <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
+    const IconTrash = () => <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>;
+
+    // --- MAIN APP COMPONENT ---
+    function App() {
+      const [activeTab, setActiveTab] = useState('home');
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [toastMessage, setToastMessage] = useState(null);
+      const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+
+      // LocalStorage State Management with Sensible Defaults
+      const [selectedHabit, setSelectedHabit] = useState(() => {
+        try {
+          return JSON.parse(localStorage.getItem('hlh_selected_habit')) || DATA.STARTING_HABITS[0];
+        } catch(e) { return DATA.STARTING_HABITS[0]; }
+      });
+
+      const [completedHabitsStreak, setCompletedHabitsStreak] = useState(() => {
+        try {
+          return parseInt(localStorage.getItem('hlh_habit_streak') || '3', 10);
+        } catch(e) { return 3; }
+      });
+
+      const [aerobicMinutesLogged, setAerobicMinutesLogged] = useState(() => {
+        try {
+          return parseInt(localStorage.getItem('hlh_aerobic_minutes') || '110', 10);
+        } catch(e) { return 110; }
+      });
+
+      const [strengthDaysLogged, setStrengthDaysLogged] = useState(() => {
+        try {
+          return parseInt(localStorage.getItem('hlh_strength_days') || '2', 10);
+        } catch(e) { return 2; }
+      });
+
+      const [waterGlassesLogged, setWaterGlassesLogged] = useState(() => {
+        try {
+          return parseInt(localStorage.getItem('hlh_water_glasses') || '7', 10);
+        } catch(e) { return 7; }
+      });
+
+      const [weeklyUserGoal, setWeeklyUserGoal] = useState(() => {
+        return localStorage.getItem('hlh_weekly_goal') || 'Walk 15 minutes after dinner on 4 weekdays';
+      });
+
+      const [groceryCheckedItems, setGroceryCheckedItems] = useState(() => {
+        try {
+          return JSON.parse(localStorage.getItem('hlh_grocery_checked')) || {};
+        } catch(e) { return {}; }
+      });
+
+      // Synchronize with LocalStorage
+      useEffect(() => {
+        localStorage.setItem('hlh_selected_habit', JSON.stringify(selectedHabit));
+      }, [selectedHabit]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_habit_streak', completedHabitsStreak.toString());
+      }, [completedHabitsStreak]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_aerobic_minutes', aerobicMinutesLogged.toString());
+      }, [aerobicMinutesLogged]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_strength_days', strengthDaysLogged.toString());
+      }, [strengthDaysLogged]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_water_glasses', waterGlassesLogged.toString());
+      }, [waterGlassesLogged]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_weekly_goal', weeklyUserGoal);
+      }, [weeklyUserGoal]);
+
+      useEffect(() => {
+        localStorage.setItem('hlh_grocery_checked', JSON.stringify(groceryCheckedItems));
+      }, [groceryCheckedItems]);
+
+      const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 4000);
+      };
+
+      const handleResetAllData = () => {
+        localStorage.clear();
+        setCompletedHabitsStreak(0);
+        setAerobicMinutesLogged(0);
+        setStrengthDaysLogged(0);
+        setWaterGlassesLogged(0);
+        setWeeklyUserGoal('');
+        setGroceryCheckedItems({});
+        setConfirmResetOpen(false);
+        showToast('All locally saved wellness data has been permanently cleared.');
+      };
+
+      const toggleGroceryItem = (itemKey) => {
+        setGroceryCheckedItems(prev => ({
+          ...prev,
+          [itemKey]: !prev[itemKey]
+        }));
+      };
+
+      const navItems = [
+        { id: 'home', label: 'Home' },
+        { id: 'nutrition', label: 'Nutrition Chart' },
+        { id: 'exercise', label: 'Exercise Planner' },
+        { id: 'tips', label: 'Health Tips' },
+        { id: 'progress', label: 'My Progress' },
+        { id: 'creators', label: 'About Creators' },
+        { id: 'references', label: 'Evidence & References' },
+        { id: 'contact', label: 'Contact' }
+      ];
+
+      return (
+        <div className="flex flex-col min-h-screen">
+          
+          {/* TOP EMERGENCY & MEDICAL DISCLAIMER BANNER (Visible on all pages) */}
+          <div className="bg-emerald-900 text-emerald-50 px-4 py-2.5 text-xs sm:text-sm font-medium border-b border-emerald-800 no-print">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
+              <div className="flex items-center gap-2">
+                <span className="bg-emerald-700 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">Educational Tool</span>
+                <span>{DATA.DISCLAIMERS.standard}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-amber-300 font-semibold text-xs shrink-0">
+                <IconAlert />
+                <span>Emergency: Chest pain, severe breathlessness or injury? Call local emergency services immediately.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* STICKY ACCESSIBLE NAVBAR */}
+          <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200 no-print">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-20">
+                
+                {/* Brand Logo & Creators Tagline */}
+                <button 
+                  onClick={() => { setActiveTab('home'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                  className="flex items-center gap-3 text-left group focus:outline-none focus:ring-2 focus:ring-brand-teal rounded-lg p-1"
+                  aria-label="Healthy Living Hub Home"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-deep to-brand-teal flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-xl sm:text-2xl font-bold tracking-tight text-brand-charcoal font-heading block group-hover:text-brand-green transition-colors">
+                      Healthy Living <span className="text-brand-green">Hub</span>
+                    </span>
+                    <span className="text-[11px] text-slate-500 block font-medium">
+                      Evidence-Based Nutrition & Movement
+                    </span>
+                  </div>
+                </button>
+
+                {/* Desktop Navigation Links */}
+                <nav className="hidden lg:flex items-center gap-1" aria-label="Main Navigation">
+                  {navItems.map(item => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`px-3 py-2 text-sm font-semibold rounded-lg transition-all ${
+                          isActive
+                            ? 'bg-brand-softGreen text-brand-green shadow-xs'
+                            : 'text-slate-600 hover:text-brand-green hover:bg-slate-50'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </nav>
+
+                {/* Right Action: Quick Print Button on printable tabs */}
+                <div className="hidden sm:flex items-center gap-3">
+                  {(activeTab === 'nutrition' || activeTab === 'exercise' || activeTab === 'tips') && (
+                    <button
+                      onClick={() => window.print()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 transition shadow-xs"
+                      title="Print or Save as PDF"
+                    >
+                      <IconPrint />
+                      <span>Print / PDF</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setActiveTab('nutrition'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg text-white bg-brand-green hover:bg-brand-deep transition shadow-sm"
+                  >
+                    Generate Plan
+                  </button>
+                </div>
+
+                {/* Mobile Menu Button */}
+                <div className="flex lg:hidden items-center gap-2">
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                    aria-label="Toggle Mobile Navigation"
+                    aria-expanded={mobileMenuOpen}
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {mobileMenuOpen ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+                      )}
+                    </svg>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Mobile Dropdown Menu */}
+            {mobileMenuOpen && (
+              <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-6 space-y-1 shadow-xl">
+                {navItems.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left px-4 py-3 text-base font-semibold rounded-lg ${
+                      activeTab === item.id
+                        ? 'bg-brand-softGreen text-brand-green'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <div className="pt-3 border-t border-slate-100 flex gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="flex-1 py-2.5 text-center text-sm font-semibold rounded-lg border border-slate-300 text-slate-700"
+                  >
+                    Print Current Page
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('nutrition'); setMobileMenuOpen(false); }}
+                    className="flex-1 py-2.5 text-center text-sm font-bold rounded-lg text-white bg-brand-green"
+                  >
+                    Start Plan
+                  </button>
+                </div>
+              </div>
+            )}
+          </header>
+
+          {/* MAIN APPLICATION CONTENT TABS */}
+          <main className="flex-grow">
+            {activeTab === 'home' && (
+              <HomeTab 
+                setActiveTab={setActiveTab} 
+                selectedHabit={selectedHabit} 
+                setSelectedHabit={setSelectedHabit}
+                completedHabitsStreak={completedHabitsStreak}
+                setCompletedHabitsStreak={setCompletedHabitsStreak}
+                showToast={showToast}
+              />
+            )}
+
+            {activeTab === 'nutrition' && (
+              <NutritionTab 
+                groceryCheckedItems={groceryCheckedItems}
+                toggleGroceryItem={toggleGroceryItem}
+                showToast={showToast}
+              />
+            )}
+
+            {activeTab === 'exercise' && (
+              <ExerciseTab 
+                aerobicMinutesLogged={aerobicMinutesLogged}
+                setAerobicMinutesLogged={setAerobicMinutesLogged}
+                strengthDaysLogged={strengthDaysLogged}
+                setStrengthDaysLogged={setStrengthDaysLogged}
+                showToast={showToast}
+              />
+            )}
+
+            {activeTab === 'tips' && (
+              <HealthTipsTab showToast={showToast} />
+            )}
+
+            {activeTab === 'progress' && (
+              <ProgressTab 
+                aerobicMinutesLogged={aerobicMinutesLogged}
+                setAerobicMinutesLogged={setAerobicMinutesLogged}
+                strengthDaysLogged={strengthDaysLogged}
+                setStrengthDaysLogged={setStrengthDaysLogged}
+                waterGlassesLogged={waterGlassesLogged}
+                setWaterGlassesLogged={setWaterGlassesLogged}
+                weeklyUserGoal={weeklyUserGoal}
+                setWeeklyUserGoal={setWeeklyUserGoal}
+                completedHabitsStreak={completedHabitsStreak}
+                setCompletedHabitsStreak={setCompletedHabitsStreak}
+                selectedHabit={selectedHabit}
+                setConfirmResetOpen={setConfirmResetOpen}
+                showToast={showToast}
+              />
+            )}
+
+            {activeTab === 'creators' && (
+              <AboutCreatorsTab />
+            )}
+
+            {activeTab === 'references' && (
+              <ReferencesTab />
+            )}
+
+            {activeTab === 'contact' && (
+              <ContactTab showToast={showToast} />
+            )}
+          </main>
+
+          {/* TOAST NOTIFICATION CONTAINER */}
+          {toastMessage && (
+            <div className="fixed bottom-6 right-6 z-50 bg-brand-charcoal text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce">
+              <span className="text-emerald-400"><IconCheck /></span>
+              <span className="text-sm font-medium">{toastMessage}</span>
+            </div>
+          )}
+
+          {/* RESET DATA MODAL DIALOG */}
+          {confirmResetOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
+                  <IconTrash />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2 font-heading">Clear Saved Wellness Data?</h3>
+                <p className="text-sm text-slate-600 mb-6">
+                  This will remove all your locally saved habits, progress minutes, custom goals, and grocery checklists from your browser's localStorage. You will start with a fresh slate.
+                </p>
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setConfirmResetOpen(false)}
+                    className="px-4 py-2 text-sm font-semibold rounded-lg text-slate-700 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleResetAllData}
+                    className="px-4 py-2 text-sm font-bold rounded-lg text-white bg-red-600 hover:bg-red-700"
+                  >
+                    Yes, Clear My Data
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ACCESSIBLE SITE FOOTER */}
+          <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800 no-print">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                
+                {/* Brand Column */}
+                <div className="md:col-span-1 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-brand-green flex items-center justify-center text-white font-bold">
+                      H
+                    </div>
+                    <span className="text-xl font-bold font-heading text-white">Healthy Living Hub</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Evidence-based nutrition education and safe, adaptable exercise routines. Committed to body-respectful, sustainable wellness for everyone.
+                  </p>
+                  <div className="pt-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-800">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      100% Private (No Account / No Server Storage)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Creators Column */}
+                <div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-heading">
+                    Created By
+                  </h4>
+                  <ul className="space-y-2 text-xs text-slate-300">
+                    <li className="font-semibold text-emerald-300">Sanskruti Vivek Talmale</li>
+                    <li className="text-slate-400">Research Lead & Nutrition Strategy</li>
+                    <li className="font-semibold text-teal-300 pt-1">Shubham Raju Wankhede</li>
+                    <li className="text-slate-400">Lead Full-Stack Architect & UX Designer</li>
+                    <li className="font-semibold text-amber-300 pt-1">Samiksha Sandip Taware</li>
+                    <li className="text-slate-400">Exercise Physiology & Wellness Educator</li>
+                  </ul>
+                </div>
+
+                {/* Quick Navigation Links */}
+                <div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-heading">
+                    Explore Hub
+                  </h4>
+                  <ul className="space-y-2 text-xs">
+                    {navItems.map(item => (
+                      <li key={item.id}>
+                        <button
+                          onClick={() => { setActiveTab(item.id); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                          className="hover:text-emerald-400 transition-colors text-left"
+                        >
+                          {item.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Data Privacy & Reset Action */}
+                <div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-heading">
+                    Privacy & Storage
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                    Your personal health metrics and checklists are stored purely on your current device using browser localStorage. We never sell, log, or transmit personal data.
+                  </p>
+                  <button
+                    onClick={() => setConfirmResetOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-red-400 hover:bg-slate-700 hover:text-red-300 border border-slate-700 transition"
+                  >
+                    <IconTrash />
+                    <span>Reset / Delete All Saved Data</span>
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Bottom Copyright & Universal Mandatory Disclaimer */}
+              <div className="pt-8 border-t border-slate-800 text-center space-y-3">
+                <p className="text-xs text-slate-400 max-w-4xl mx-auto leading-relaxed">
+                  <strong className="text-slate-300">Medical Disclaimer:</strong> {DATA.DISCLAIMERS.standard} Always consult your doctor before beginning any vigorous exercise regimen or therapeutic dietary protocol.
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  © 2026 Healthy Living Hub. Designed with scientific integrity by Sanskruti Vivek Talmale, Shubham Raju Wankhede, and Samiksha Sandip Taware.
+                </p>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 1. HOMEPAGE COMPONENT
+    // ==========================================
+    function HomeTab({ setActiveTab, selectedHabit, setSelectedHabit, completedHabitsStreak, setCompletedHabitsStreak, showToast }) {
+      const [currentCarouselIdx, setCurrentCarouselIdx] = useState(0);
+      const [isHovered, setIsHovered] = useState(false);
+      const facts = DATA.CAROUSEL_FACTS;
+
+      // Autoplay Carousel with Pause on Hover
+      useEffect(() => {
+        if (isHovered) return;
+        const timer = setInterval(() => {
+          setCurrentCarouselIdx(prev => (prev + 1) % facts.length);
+        }, 5500);
+        return () => clearInterval(timer);
+      }, [isHovered, facts.length]);
+
+      const handleHabitSelect = (habit) => {
+        setSelectedHabit(habit);
+        showToast(`Habit selected: "${habit.title}". Check your Progress dashboard!`);
+      };
+
+      return (
+        <div className="space-y-16 py-8 sm:py-12">
+          
+          {/* HERO SECTION */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 rounded-3xl text-white shadow-xl p-8 sm:p-14">
+              
+              {/* Subtle Decorative Pattern */}
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-white/5 pointer-events-none blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-emerald-500/10 pointer-events-none blur-2xl"></div>
+
+              <div className="relative z-10 max-w-3xl space-y-6">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  Evidence-Based Wellness Education
+                </div>
+                
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-heading leading-tight">
+                  Small Daily Choices, <span className="text-emerald-300">Lifelong Health.</span>
+                </h1>
+
+                <p className="text-base sm:text-xl text-emerald-100 font-normal leading-relaxed">
+                  Build a balanced nutrition chart, discover exercises that fit your life, and learn practical habits for better health. No extreme crash diets, no gimmicks—just clear, verified lifestyle science.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <button
+                    onClick={() => { setActiveTab('nutrition'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                    className="px-7 py-3.5 rounded-xl font-bold text-base bg-emerald-400 text-emerald-950 hover:bg-emerald-300 transition shadow-lg hover:shadow-xl text-center"
+                  >
+                    Create My Nutrition Chart
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('exercise'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                    className="px-7 py-3.5 rounded-xl font-bold text-base bg-white/15 text-white hover:bg-white/25 border border-white/30 backdrop-blur-md transition shadow-md text-center"
+                  >
+                    Build My Exercise Plan
+                  </button>
+                </div>
+
+                {/* Trust Badges */}
+                <div className="pt-6 border-t border-white/15 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs text-emerald-200">
+                  <div className="flex items-center gap-2">
+                    <IconCheck />
+                    <span>WHO Physical Activity Standards</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IconCheck />
+                    <span>Dietary Guidelines for Americans</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IconCheck />
+                    <span>100% Client-Side Privacy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* WHY IT MATTERS SECTION */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 font-heading mb-4">
+                Why Daily Lifestyle Harmony Matters
+              </h2>
+              <p className="text-base text-slate-600 leading-relaxed">
+                Health is not a single number on a bathroom scale. True well-being is the synergistic interplay between nourishing food, consistent movement, restorative sleep, mindful stress reduction, and adequate cellular hydration.
+              </p>
+            </div>
+
+            {/* Four Visual Pillars */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              
+              <div className="hlh-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-2xl mb-4">
+                    🥦
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-heading">
+                    1. Eat a Variety of Nutrient-Dense Foods
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Prioritize diverse vegetables (dark greens, legumes, red/orange roots), whole fruits over juices, unrefined grains, and sustainable protein sources.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-emerald-700">
+                  Microbiome & Cellular Vitality
+                </div>
+              </div>
+
+              <div className="hlh-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center text-2xl mb-4">
+                    🏃
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-heading">
+                    2. Move Most Days of the Week
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Accumulate at least 150–300 minutes of moderate aerobic activity weekly. Even brisk 10-minute bouts lower cardiovascular risk and boost daily energy.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-teal-700">
+                  Cardiovascular & Mood Resilience
+                </div>
+              </div>
+
+              <div className="hlh-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl mb-4">
+                    💪
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-heading">
+                    3. Strengthen Muscles Twice Weekly
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Target all major muscle groups at least 2 days each week. Resistance work preserves bone mineral density, joint stability, and insulin sensitivity.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-amber-700">
+                  Skeletal Health & Functional Autonomy
+                </div>
+              </div>
+
+              <div className="hlh-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-800 flex items-center justify-center text-2xl mb-4">
+                    ⚖️
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-heading">
+                    4. Limit Sugars, Saturated Fat & Sodium
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Practice mindful portion awareness and smart swaps rather than rigid elimination. Restrict packaged ultra-processed foods without banning your cultural staples.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-orange-700">
+                  Vascular & Metabolic Protection
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* INTERACTIVE "START WITH ONE HABIT" MODULE */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                  <span className="text-xs uppercase font-bold tracking-wider text-brand-green bg-emerald-100 px-3 py-1 rounded-full">
+                    Interactive Habit Architect
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mt-2">
+                    Start with One Small Habit
+                  </h2>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Behavioral psychology confirms that lasting health changes begin with tiny, non-threatening daily rituals. Select one goal below to focus on this week:
+                  </p>
+                </div>
+                <div className="text-left md:text-right shrink-0">
+                  <span className="text-xs text-slate-500 block">Your Current Streak</span>
+                  <span className="text-2xl font-extrabold text-brand-green">{completedHabitsStreak} Days Strong 🔥</span>
+                </div>
+              </div>
+
+              {/* Habit Selection Chips */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+                {DATA.STARTING_HABITS.map(habit => {
+                  const isSelected = selectedHabit.id === habit.id;
+                  return (
+                    <button
+                      key={habit.id}
+                      onClick={() => handleHabitSelect(habit)}
+                      className={`p-4 rounded-xl text-left border transition-all flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-emerald-800 text-white border-emerald-900 shadow-md transform -translate-y-1'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xl">{habit.icon}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          isSelected ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {habit.badge}
+                        </span>
+                      </div>
+                      <div className="font-bold text-sm leading-tight mt-1">
+                        {habit.title}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Detailed Selected Habit Card */}
+              {selectedHabit && (
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-emerald-200 shadow-sm flex flex-col md:flex-row gap-6 items-start justify-between">
+                  <div className="space-y-4 max-w-2xl">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{selectedHabit.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 font-heading">
+                          Selected Micro-Habit: {selectedHabit.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Pillar: {selectedHabit.badge}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {selectedHabit.description}
+                    </p>
+                    <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                      <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">
+                        Why It Works (The Physiological Evidence):
+                      </h4>
+                      <p className="text-xs text-emerald-800 leading-relaxed">
+                        {selectedHabit.whyItWorks}
+                      </p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">
+                        Today’s Action Step:
+                      </h4>
+                      <p className="text-xs text-slate-700 font-medium">
+                        {selectedHabit.actionStep}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="w-full md:w-auto shrink-0 space-y-3">
+                    <button
+                      onClick={() => {
+                        setCompletedHabitsStreak(prev => prev + 1);
+                        showToast(`Great job! Logged today's habit. Streak is now ${completedHabitsStreak + 1} days!`);
+                      }}
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-brand-green text-white hover:bg-brand-deep transition shadow-md flex items-center justify-center gap-2"
+                    >
+                      <IconCheck />
+                      <span>Mark Completed Today</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('progress'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-xs border border-slate-300 text-slate-700 hover:bg-slate-100 transition block text-center"
+                    >
+                      View in My Progress Dashboard
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ROTATING EVIDENCE-BASED FACT CAROUSEL */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div 
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-teal-500 animate-pulse"></div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-teal-800">
+                    Evidence Fact #{facts[currentCarouselIdx].id} of {facts.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentCarouselIdx(prev => (prev - 1 + facts.length) % facts.length)}
+                    className="p-2 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
+                    aria-label="Previous Evidence Fact"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={() => setCurrentCarouselIdx(prev => (prev + 1) % facts.length)}
+                    className="p-2 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
+                    aria-label="Next Evidence Fact"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4 min-h-[160px] flex flex-col justify-center">
+                <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 border border-teal-200 w-fit">
+                  {facts[currentCarouselIdx].tag}
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                  "{facts[currentCarouselIdx].title}"
+                </h3>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
+                  {facts[currentCarouselIdx].body}
+                </p>
+                <p className="text-xs text-slate-500 italic">
+                  Scientific Source: {facts[currentCarouselIdx].source}
+                </p>
+              </div>
+
+              {/* Indicator Dots */}
+              <div className="flex justify-center gap-2 mt-6">
+                {facts.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentCarouselIdx(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === currentCarouselIdx ? 'w-8 bg-brand-green' : 'w-2 bg-slate-300'
+                    }`}
+                    aria-label={`Jump to fact ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 2. NUTRITION CHART GENERATOR COMPONENT
+    // ==========================================
+    function NutritionTab({ groceryCheckedItems, toggleGroceryItem, showToast }) {
+      const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+      const [step, setStep] = useState(1);
+      const [formData, setFormData] = useState({
+        units: 'metric', // metric (cm, kg) or imperial (ft/in, lbs)
+        age: 28,
+        sex: 'female',
+        heightCm: 165,
+        heightFt: 5,
+        heightIn: 5,
+        weightKg: 62,
+        weightLbs: 136,
+        isPregnantOrBreastfeeding: false,
+        conditions: [],
+        activityLevel: 'moderately_active',
+        primaryGoal: 'general_health',
+        dietaryPattern: 'vegetarian',
+        cuisine: 'indian',
+        budget: 'medium',
+        cookingTime: '30_60',
+        allergies: [],
+        dislikedFoods: '',
+        mealsCount: '3_plus_snacks',
+        typicalMealTimes: 'Breakfast 8:30 AM, Lunch 1:30 PM, Snack 5:00 PM, Dinner 8:30 PM',
+        waterHabitLiters: '2.5',
+        wantGroceryAndPrepTips: true
+      });
+
+      const [hasGeneratedPlan, setHasGeneratedPlan] = useState(true);
+
+      const handleConditionToggle = (cond) => {
+        setFormData(prev => {
+          const exists = prev.conditions.includes(cond);
+          return {
+            ...prev,
+            conditions: exists ? prev.conditions.filter(c => c !== cond) : [...prev.conditions, cond]
+          };
+        });
+      };
+
+      const handleAllergyToggle = (allergy) => {
+        setFormData(prev => {
+          const exists = prev.allergies.includes(allergy);
+          return {
+            ...prev,
+            allergies: exists ? prev.allergies.filter(a => a !== allergy) : [...prev.allergies, allergy]
+          };
+        });
+      };
+
+      // BMI & Caloric Calculation Engine
+      const calculations = useMemo(() => {
+        let heightMeters = 1.65;
+        let weightKg = 62;
+
+        if (formData.units === 'metric') {
+          heightMeters = (formData.heightCm || 165) / 100;
+          weightKg = formData.weightKg || 62;
+        } else {
+          const totalInches = (parseInt(formData.heightFt || 5, 10) * 12) + parseInt(formData.heightIn || 5, 10);
+          heightMeters = totalInches * 0.0254;
+          weightKg = (formData.weightLbs || 136) * 0.453592;
+        }
+
+        const bmi = (weightKg / (heightMeters * heightMeters)).toFixed(1);
+        
+        let bmiCategory = 'Healthy Weight Range';
+        if (bmi < 18.5) bmiCategory = 'Underweight screening range';
+        else if (bmi < 25) bmiCategory = 'Standard weight range';
+        else if (bmi < 30) bmiCategory = 'Overweight screening range';
+        else bmiCategory = 'Higher weight screening range';
+
+        // Mifflin - St Jeor Equation for BMR
+        const age = parseInt(formData.age || 28, 10);
+        let bmr = (10 * weightKg) + (6.25 * heightMeters * 100) - (5 * age);
+        bmr = formData.sex === 'male' ? bmr + 5 : bmr - 161;
+
+        // Physical Activity Level (PAL) Multiplier
+        let pal = 1.55;
+        if (formData.activityLevel === 'sedentary') pal = 1.2;
+        else if (formData.activityLevel === 'lightly_active') pal = 1.375;
+        else if (formData.activityLevel === 'moderately_active') pal = 1.55;
+        else if (formData.activityLevel === 'very_active') pal = 1.725;
+        else if (formData.activityLevel === 'athlete') pal = 1.9;
+
+        let tdee = Math.round(bmr * pal);
+
+        // Adjust for non-extreme, sustainable goals
+        let targetCalories = tdee;
+        if (formData.primaryGoal === 'gradual_weight_loss') targetCalories = Math.max(1300, tdee - 350);
+        else if (formData.primaryGoal === 'gradual_weight_gain') targetCalories = tdee + 350;
+        else if (formData.primaryGoal === 'muscle_support') targetCalories = tdee + 200;
+
+        // Macronutrient Distribution
+        const proteinGrams = Math.round((targetCalories * 0.22) / 4);
+        const carbsGrams = Math.round((targetCalories * 0.50) / 4);
+        const fatGrams = Math.round((targetCalories * 0.28) / 9);
+        const fiberTargetGrams = weightKg > 70 ? 35 : 28;
+        const waterTargetLiters = (weightKg * 0.035).toFixed(1);
+
+        return {
+          bmi,
+          bmiCategory,
+          calorieRange: `${targetCalories - 100} – ${targetCalories + 100}`,
+          targetCalories,
+          proteinGrams,
+          carbsGrams,
+          fatGrams,
+          fiberTargetGrams,
+          waterTargetLiters
+        };
+      }, [formData]);
+
+      // Check if user has high-risk conditions
+      const hasMedicalFlag = formData.isPregnantOrBreastfeeding || formData.conditions.length > 0 || formData.age < 18 || formData.age > 65;
+
+      // Select plan list based on cuisine preference
+      const activeMealPlan = formData.cuisine === 'mediterranean' 
+        ? DATA.NUTRITION_PLANS.mediterranean 
+        : DATA.NUTRITION_PLANS.indian;
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+          
+          {/* Header Title */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              Evidence-Based Meal Architecture
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Personalized 7-Day Nutrition Chart
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Generate a balanced, culturally adaptive weekly meal blueprint. Grounded in WHO and Dietary Guidelines for Americans principles—without extreme restriction.
+            </p>
+          </div>
+
+          {/* MEDICAL SAFETY SCREENING ALERT BANNER */}
+          {hasMedicalFlag && (
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-amber-900 shadow-sm flex items-start gap-4">
+              <span className="text-amber-600 text-2xl shrink-0 mt-0.5"><IconAlert /></span>
+              <div className="space-y-1">
+                <h3 className="font-bold text-base font-heading">
+                  Important Clinical Guidance for Your Profile
+                </h3>
+                <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">
+                  You indicated that you are {formData.isPregnantOrBreastfeeding ? 'pregnant/breastfeeding, ' : ''}
+                  {formData.age < 18 ? 'under 18, ' : ''}{formData.age > 65 ? 'over 65, ' : ''}
+                  {formData.conditions.length > 0 ? `managing ${formData.conditions.join(', ')}. ` : ''}
+                  Because medical conditions require individualized therapeutic nutrition and careful clinical monitoring, this educational chart serves as a general informational reference. Please review this plan with your treating doctor or registered dietitian before making significant nutritional modifications.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* MULTI-STEP INTERACTIVE QUESTIONNAIRE FORM */}
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm no-print">
+            <div className="border-b border-slate-200 pb-5 mb-8 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                  Step {step} of 4: {
+                    step === 1 ? 'Body Metrics & Units' :
+                    step === 2 ? 'Health Screening & Safety' :
+                    step === 3 ? 'Lifestyle, Cuisine & Budget' :
+                    'Allergies, Timing & Meal Structure'
+                  }
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  All metrics stay on your computer. Nothing is sent to an external server.
+                </p>
+              </div>
+
+              {/* Progress Indicator Dots */}
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setStep(s)}
+                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${
+                      step === s
+                        ? 'bg-brand-green text-white shadow-sm'
+                        : step > s
+                        ? 'bg-emerald-100 text-brand-green'
+                        : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* STEP 1: Body Metrics */}
+            {step === 1 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl w-fit border border-slate-200">
+                  <span className="text-xs font-semibold text-slate-700">Measurement System:</span>
+                  <label className="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="units" 
+                      value="metric" 
+                      checked={formData.units === 'metric'}
+                      onChange={() => setFormData({...formData, units: 'metric'})}
+                      className="text-brand-green focus:ring-brand-teal"
+                    />
+                    Metric (cm, kg)
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="units" 
+                      value="imperial" 
+                      checked={formData.units === 'imperial'}
+                      onChange={() => setFormData({...formData, units: 'imperial'})}
+                      className="text-brand-green focus:ring-brand-teal"
+                    />
+                    Imperial (ft/in, lbs)
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Age (years)</label>
+                    <input
+                      type="number"
+                      min="12"
+                      max="110"
+                      value={formData.age}
+                      onChange={(e) => setFormData({...formData, age: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Sex Assigned at Birth</label>
+                    <select
+                      value={formData.sex}
+                      onChange={(e) => setFormData({...formData, sex: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="female">Female</option>
+                      <option value="male">Male</option>
+                    </select>
+                  </div>
+
+                  {formData.units === 'metric' ? (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Height (cm)</label>
+                      <input
+                        type="number"
+                        min="100"
+                        max="240"
+                        value={formData.heightCm}
+                        onChange={(e) => setFormData({...formData, heightCm: e.target.value})}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Height (Feet)</label>
+                        <input
+                          type="number"
+                          min="3"
+                          max="8"
+                          value={formData.heightFt}
+                          onChange={(e) => setFormData({...formData, heightFt: e.target.value})}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Inches</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="11"
+                          value={formData.heightIn}
+                          onChange={(e) => setFormData({...formData, heightIn: e.target.value})}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Weight ({formData.units === 'metric' ? 'kg' : 'lbs'})
+                    </label>
+                    <input
+                      type="number"
+                      min="30"
+                      max="300"
+                      value={formData.units === 'metric' ? formData.weightKg : formData.weightLbs}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (formData.units === 'metric') setFormData({...formData, weightKg: val});
+                        else setFormData({...formData, weightLbs: val});
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: Medical & Safety Screening */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                  <h4 className="text-sm font-bold text-emerald-900 mb-1">Safety First</h4>
+                  <p className="text-xs text-emerald-800 leading-relaxed">
+                    Please indicate any conditions or life-stages that apply to you so we can display relevant safety warnings and avoid recommending incompatible practices.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isPregnantOrBreastfeeding}
+                      onChange={(e) => setFormData({...formData, isPregnantOrBreastfeeding: e.target.checked})}
+                      className="w-4 h-4 text-brand-green rounded"
+                    />
+                    <div>
+                      <span className="text-sm font-bold text-slate-800 block">Currently Pregnant or Breastfeeding</span>
+                      <span className="text-xs text-slate-500">Requires tailored maternal micronutrients (folate, iron, DHA, calcium) and clinical guidance.</span>
+                    </div>
+                  </label>
+
+                  <div className="text-xs font-bold text-slate-700 mt-4 mb-2">Diagnosed Medical Conditions:</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[
+                      'Type 1 or Type 2 Diabetes',
+                      'Hypertension (High Blood Pressure)',
+                      'Cardiovascular / Heart Disease',
+                      'Chronic Kidney Disease',
+                      'History of Eating Disorder',
+                      'Gastrointestinal Condition (IBS/Celiac)',
+                      'Thyroid Disorder',
+                      'High Cholesterol / Dyslipidemia'
+                    ].map(cond => (
+                      <label key={cond} className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-semibold text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={formData.conditions.includes(cond)}
+                          onChange={() => handleConditionToggle(cond)}
+                          className="w-4 h-4 text-brand-green rounded"
+                        />
+                        <span>{cond}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: Goals, Cuisine & Budget */}
+            {step === 3 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Activity Level</label>
+                    <select
+                      value={formData.activityLevel}
+                      onChange={(e) => setFormData({...formData, activityLevel: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="sedentary">Sedentary (Desk work, minimal exercise)</option>
+                      <option value="lightly_active">Lightly Active (Light walking 1–3 days/wk)</option>
+                      <option value="moderately_active">Moderately Active (Moderate exercise 3–5 days/wk)</option>
+                      <option value="very_active">Very Active (Hard training 6–7 days/wk)</option>
+                      <option value="athlete">Athlete / High-Intensity Competitive</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Primary Wellness Goal</label>
+                    <select
+                      value={formData.primaryGoal}
+                      onChange={(e) => setFormData({...formData, primaryGoal: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="general_health">General Health & Satiety</option>
+                      <option value="weight_maintenance">Weight Maintenance & Vitality</option>
+                      <option value="gradual_weight_loss">Gradual Weight Loss (Safe 250–350 kcal deficit)</option>
+                      <option value="gradual_weight_gain">Gradual Weight Gain (Nourishing Surplus)</option>
+                      <option value="muscle_support">Muscle Support & Physical Recovery</option>
+                      <option value="improved_eating_habits">Improved Eating Habits & Gut Microbiome</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Dietary Pattern</label>
+                    <select
+                      value={formData.dietaryPattern}
+                      onChange={(e) => setFormData({...formData, dietaryPattern: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="vegetarian">Vegetarian (Lacto-vegetarian)</option>
+                      <option value="vegan">Vegan (100% Plant-Based)</option>
+                      <option value="eggetarian">Eggetarian (Vegetarian + Eggs)</option>
+                      <option value="non_vegetarian">Non-Vegetarian (Includes poultry/meat)</option>
+                      <option value="pescatarian">Pescatarian (Vegetarian + Fish)</option>
+                      <option value="jain">Jain (No root vegetables, onion, garlic)</option>
+                      <option value="custom">Custom / Flexible</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Cuisine Preference</label>
+                    <select
+                      value={formData.cuisine}
+                      onChange={(e) => setFormData({...formData, cuisine: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="indian">Indian (Dal, Roti, Rice, Sabzi, Poha, Khichdi)</option>
+                      <option value="mediterranean">Mediterranean (Olive oil, Chickpeas, Quinoa, Herbs)</option>
+                      <option value="western">Western / Global Whole Foods</option>
+                      <option value="mixed">Mixed Cultural Variety</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Budget Preference</label>
+                    <select
+                      value={formData.budget}
+                      onChange={(e) => setFormData({...formData, budget: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="low">Budget-Friendly (Staple lentils, seasonal veggies, bulk grains)</option>
+                      <option value="medium">Medium / Balanced Everyday</option>
+                      <option value="flexible">Flexible / Specialty Ingredients</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Daily Cooking Time Available</label>
+                    <select
+                      value={formData.cookingTime}
+                      onChange={(e) => setFormData({...formData, cookingTime: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="quick">Under 15 minutes (Quick & Minimal Cook)</option>
+                      <option value="15_30">15 to 30 minutes</option>
+                      <option value="30_60">30 to 60 minutes (Standard Homestyle)</option>
+                      <option value="batch">60+ minutes (Batch Cooking Enthusiast)</option>
+                    </select>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: Allergies & Meal Timings */}
+            {step === 4 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">Food Allergies & Intolerances</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {['Tree Nuts', 'Peanuts', 'Milk / Lactose', 'Eggs', 'Soy', 'Wheat / Gluten', 'Fish', 'Shellfish', 'Sesame'].map(allergy => (
+                      <label key={allergy} className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 text-xs font-medium cursor-pointer hover:bg-slate-50">
+                        <input
+                          type="checkbox"
+                          checked={formData.allergies.includes(allergy)}
+                          onChange={() => handleAllergyToggle(allergy)}
+                          className="w-4 h-4 text-brand-green rounded"
+                        />
+                        <span>{allergy}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Number of Meals Structure</label>
+                    <select
+                      value={formData.mealsCount}
+                      onChange={(e) => setFormData({...formData, mealsCount: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    >
+                      <option value="3_meals">3 Main Meals (Breakfast, Lunch, Dinner)</option>
+                      <option value="3_plus_snacks">3 Main Meals + Afternoon Snack</option>
+                      <option value="5_small">5 Smaller Meals throughout the day</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Typical Meal Timings</label>
+                    <input
+                      type="text"
+                      value={formData.typicalMealTimes}
+                      onChange={(e) => setFormData({...formData, typicalMealTimes: e.target.value})}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                      placeholder="e.g. 8:30 AM, 1:30 PM, 5:00 PM, 8:30 PM"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Disliked Foods to Avoid (Optional)</label>
+                  <input
+                    type="text"
+                    value={formData.dislikedFoods}
+                    onChange={(e) => setFormData({...formData, dislikedFoods: e.target.value})}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    placeholder="e.g. bitter gourd, raw tomatoes, mushrooms, spicy peppers"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.wantGroceryAndPrepTips}
+                      onChange={(e) => setFormData({...formData, wantGroceryAndPrepTips: e.target.checked})}
+                      className="w-4 h-4 text-brand-green rounded"
+                    />
+                    <span>Include categorized weekly grocery list and meal-preparation tips</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Buttons for Wizard */}
+            <div className="flex items-center justify-between pt-8 border-t border-slate-200 mt-8">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+                >
+                  ← Back to Step {step - 1}
+                </button>
+              ) : <div></div>}
+
+              {step < 4 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep(step + 1)}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-green hover:bg-brand-deep transition shadow-sm"
+                >
+                  Continue to Step {step + 1} →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasGeneratedPlan(true);
+                    showToast('Personalized 7-Day Nutrition Chart generated successfully!');
+                  }}
+                  className="px-7 py-3 rounded-xl text-sm font-bold text-white bg-brand-green hover:bg-brand-deep transition shadow-md flex items-center gap-2"
+                >
+                  <IconCheck />
+                  <span>Generate My 7-Day Plan</span>
+                </button>
+              )}
+            </div>
+
+          </div>
+
+          {/* GENERATED NUTRITIONAL OVERVIEW & METRICS CARDS */}
+          {hasGeneratedPlan && (
+            <div className="space-y-8">
+              
+              {/* Educational Screening Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                {/* BMI Card with Neutral Non-Judgmental Explanation */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Screening Metric
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold text-slate-900 font-heading">{calculations.bmi}</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      {calculations.bmiCategory}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                    <strong>Note:</strong> BMI is a general population screening index, not an individualized measure of muscle mass, bone density, or metabolic wellness.
+                  </p>
+                </div>
+
+                {/* Calorie Range Estimate */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Estimated Daily Energy
+                  </div>
+                  <div className="text-2xl font-extrabold text-brand-green font-heading">
+                    ~{calculations.calorieRange} <span className="text-sm font-normal text-slate-500">kcal/day</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                    Estimated via Mifflin-St Jeor equation. Individual metabolic expenditure naturally fluctuates day to day.
+                  </p>
+                </div>
+
+                {/* Target Macronutrients */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Daily Nutrient Targets
+                  </div>
+                  <div className="text-xs space-y-1 font-medium text-slate-700">
+                    <div className="flex justify-between">
+                      <span>Protein:</span>
+                      <strong className="text-blue-700">~{calculations.proteinGrams}g (22%)</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Complex Carbs:</span>
+                      <strong className="text-amber-700">~{calculations.carbsGrams}g (50%)</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Healthy Unsaturated Fat:</span>
+                      <strong className="text-emerald-700">~{calculations.fatGrams}g (28%)</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fiber and Water Targets */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Microbiome & Hydration
+                  </div>
+                  <div className="text-xs space-y-1 font-medium text-slate-700">
+                    <div className="flex justify-between">
+                      <span>Dietary Fiber Target:</span>
+                      <strong className="text-emerald-800">{calculations.fiberTargetGrams}g+ daily</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Baseline Water Intake:</span>
+                      <strong className="text-teal-700">~{calculations.waterTargetLiters} Liters/day</strong>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                    Prioritize bioavailable fiber from beans, dals, oats, millets, vegetables, and whole fruits.
+                  </p>
+                </div>
+
+              </div>
+
+              {/* VIEW SWITCHER & ACTION BUTTONS */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 no-print">
+                <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setViewMode('cards')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
+                      viewMode === 'cards' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Card-by-Card View
+                  </button>
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
+                      viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    7-Day Comparison Table
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      localStorage.setItem('hlh_saved_plan', JSON.stringify({ formData, calculations, date: new Date().toISOString() }));
+                      showToast('Nutrition plan successfully saved to browser local storage!');
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition shadow-xs"
+                  >
+                    <IconCheck />
+                    <span>Save to Browser</span>
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-brand-green text-white hover:bg-brand-deep transition shadow-xs"
+                  >
+                    <IconPrint />
+                    <span>Print / Save as PDF</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* PRINT HEADER (Shown ONLY during print / PDF generation) */}
+              <div className="print-header">
+                <h1 className="text-2xl font-bold text-slate-900">Healthy Living Hub - 7-Day Nutrition Blueprint</h1>
+                <p className="text-xs text-slate-600">
+                  Prepared for: General Educational Wellness | Dietary Pattern: {formData.dietaryPattern} | Cuisine: {formData.cuisine}
+                </p>
+                <p className="text-[10px] text-slate-500 italic mt-1">
+                  Disclaimer: {DATA.DISCLAIMERS.standard}
+                </p>
+              </div>
+
+              {/* 7-DAY MEAL PLAN: CARDS VIEW */}
+              {viewMode === 'cards' ? (
+                <div className="space-y-6">
+                  {activeMealPlan.map(dayPlan => (
+                    <div key={dayPlan.day} className="meal-day-card bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 printable-card">
+                      
+                      {/* Day Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                        <div>
+                          <span className="text-xs uppercase font-extrabold text-brand-green tracking-wider">
+                            Day {dayPlan.day}
+                          </span>
+                          <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                            {dayPlan.dayName} — {dayPlan.theme}
+                          </h3>
+                        </div>
+                        <div className="text-xs text-slate-500 font-medium">
+                          Estimated Total: ~1650–1850 kcal | Balanced Whole Food Matrix
+                        </div>
+                      </div>
+
+                      {/* Meals Grid for the Day */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        {/* Breakfast */}
+                        <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-100 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Breakfast</span>
+                              <span className="text-[10px] font-bold text-slate-500">{dayPlan.breakfast.calories} kcal | {dayPlan.breakfast.protein}</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                              {dayPlan.breakfast.name}
+                            </h4>
+                            <p className="text-xs text-slate-600">
+                              <strong>Portion:</strong> {dayPlan.breakfast.portion}
+                            </p>
+                            <p className="text-[11px] text-slate-500 italic">
+                              <strong>Prep:</strong> {dayPlan.breakfast.prep}
+                            </p>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {dayPlan.breakfast.foodGroups.map((g, i) => (
+                                <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-medium">
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-amber-200/60 text-[10px] text-amber-900">
+                            <strong>Swap:</strong> {dayPlan.breakfast.swaps}
+                          </div>
+                        </div>
+
+                        {/* Lunch */}
+                        <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">Lunch</span>
+                              <span className="text-[10px] font-bold text-slate-500">{dayPlan.lunch.calories} kcal | {dayPlan.lunch.protein}</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                              {dayPlan.lunch.name}
+                            </h4>
+                            <p className="text-xs text-slate-600">
+                              <strong>Portion:</strong> {dayPlan.lunch.portion}
+                            </p>
+                            <p className="text-[11px] text-slate-500 italic">
+                              <strong>Prep:</strong> {dayPlan.lunch.prep}
+                            </p>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {dayPlan.lunch.foodGroups.map((g, i) => (
+                                <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 font-medium">
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-emerald-200/60 text-[10px] text-emerald-900">
+                            <strong>Swap:</strong> {dayPlan.lunch.swaps}
+                          </div>
+                        </div>
+
+                        {/* Dinner */}
+                        <div className="p-4 rounded-2xl bg-teal-50/50 border border-teal-100 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Dinner</span>
+                              <span className="text-[10px] font-bold text-slate-500">{dayPlan.dinner.calories} kcal | {dayPlan.dinner.protein}</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                              {dayPlan.dinner.name}
+                            </h4>
+                            <p className="text-xs text-slate-600">
+                              <strong>Portion:</strong> {dayPlan.dinner.portion}
+                            </p>
+                            <p className="text-[11px] text-slate-500 italic">
+                              <strong>Prep:</strong> {dayPlan.dinner.prep}
+                            </p>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {dayPlan.dinner.foodGroups.map((g, i) => (
+                                <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-900 font-medium">
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-teal-200/60 text-[10px] text-teal-900">
+                            <strong>Swap:</strong> {dayPlan.dinner.swaps}
+                          </div>
+                        </div>
+
+                        {/* Snack */}
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Healthy Snack</span>
+                              <span className="text-[10px] font-bold text-slate-500">{dayPlan.snacks.calories} kcal | {dayPlan.snacks.protein}</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                              {dayPlan.snacks.name}
+                            </h4>
+                            <p className="text-xs text-slate-600">
+                              <strong>Portion:</strong> {dayPlan.snacks.portion}
+                            </p>
+                            <p className="text-[11px] text-slate-500 italic">
+                              <strong>Prep:</strong> {dayPlan.snacks.prep}
+                            </p>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {dayPlan.snacks.foodGroups.map((g, i) => (
+                                <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-800 font-medium">
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-slate-200 text-[10px] text-slate-600">
+                            <strong>Swap:</strong> {dayPlan.snacks.swaps}
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* 7-DAY COMPARATIVE TABLE VIEW */
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden printable-card">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                          <th className="p-3">Day</th>
+                          <th className="p-3">Breakfast</th>
+                          <th className="p-3">Lunch</th>
+                          <th className="p-3">Dinner</th>
+                          <th className="p-3">Snack</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {activeMealPlan.map(dp => (
+                          <tr key={dp.day} className="hover:bg-slate-50">
+                            <td className="p-3 font-bold text-brand-green whitespace-nowrap align-top">
+                              {dp.dayName}
+                            </td>
+                            <td className="p-3 align-top max-w-xs">
+                              <div className="font-semibold text-slate-800">{dp.breakfast.name}</div>
+                              <div className="text-[10px] text-slate-500">{dp.breakfast.portion} ({dp.breakfast.calories} kcal)</div>
+                            </td>
+                            <td className="p-3 align-top max-w-xs">
+                              <div className="font-semibold text-slate-800">{dp.lunch.name}</div>
+                              <div className="text-[10px] text-slate-500">{dp.lunch.portion} ({dp.lunch.calories} kcal)</div>
+                            </td>
+                            <td className="p-3 align-top max-w-xs">
+                              <div className="font-semibold text-slate-800">{dp.dinner.name}</div>
+                              <div className="text-[10px] text-slate-500">{dp.dinner.portion} ({dp.dinner.calories} kcal)</div>
+                            </td>
+                            <td className="p-3 align-top max-w-xs">
+                              <div className="font-semibold text-slate-800">{dp.snacks.name}</div>
+                              <div className="text-[10px] text-slate-500">{dp.snacks.portion} ({dp.snacks.calories} kcal)</div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* WEEKLY GROCERY LIST & MEAL PREPARATION TIPS */}
+              {formData.wantGroceryAndPrepTips && (
+                <div className="space-y-8 pt-6">
+                  
+                  {/* Grocery List */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6 printable-card">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                      <div>
+                        <span className="text-xs uppercase font-bold tracking-wider text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-full">
+                          Pantry Checklist
+                        </span>
+                        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading mt-1">
+                          Weekly Grocery Shopping List
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Grouped by whole-food categories. Tap items to check them off as you shop in local markets or supermarkets.
+                        </p>
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 no-print">
+                        {Object.values(groceryCheckedItems).filter(Boolean).length} items checked
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {DATA.GROCERY_LIST.map((cat, idx) => (
+                        <div key={idx} className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 grocery-category-card">
+                          <div className="flex items-center gap-2 font-bold text-sm text-slate-800 mb-3 pb-2 border-b border-slate-200">
+                            <span>{cat.icon}</span>
+                            <span>{cat.category}</span>
+                          </div>
+                          <div className="space-y-2">
+                            {cat.items.map((it, i) => {
+                              const key = `${cat.category}_${i}`;
+                              const isChecked = !!groceryCheckedItems[key];
+                              return (
+                                <label key={i} className="flex items-start gap-2.5 text-xs cursor-pointer group">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => toggleGroceryItem(key)}
+                                    className="mt-0.5 w-4 h-4 text-brand-green rounded focus:ring-brand-teal"
+                                  />
+                                  <div>
+                                    <span className={`font-semibold block ${isChecked ? 'line-through text-slate-400' : 'text-slate-800 group-hover:text-brand-green'}`}>
+                                      {it.name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 leading-tight block">
+                                      {it.note}
+                                    </span>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Food Prep & Budget Tips */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {DATA.FOOD_PREP_TIPS.map((tip, idx) => (
+                      <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{tip.icon}</span>
+                          <h4 className="font-bold text-sm text-slate-900 font-heading">{tip.title}</h4>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {tip.content}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              )}
+
+              {/* HOW TO ADJUST THIS PLAN COLLAPSIBLE GUIDE */}
+              <div className="bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 font-heading">
+                    How to Adapt This Plan to Your Daily Needs
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Plans are guidelines, not rigid contracts. Learn how to tune portions and food swaps intuitively:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {DATA.ADJUSTMENT_GUIDE.map((adj, i) => (
+                    <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 space-y-1.5">
+                      <h4 className="font-bold text-xs text-brand-green uppercase tracking-wide">
+                        {adj.topic}
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {adj.explanation}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 3. EXERCISE PLANNER COMPONENT
+    // ==========================================
+    function ExerciseTab({ aerobicMinutesLogged, setAerobicMinutesLogged, strengthDaysLogged, setStrengthDaysLogged, showToast }) {
+      const [fitnessLevel, setFitnessLevel] = useState('beginner');
+      const [ageGroup, setAgeGroup] = useState('adult');
+      const [exerciseGoal, setExerciseGoal] = useState('general_health');
+      const [location, setLocation] = useState('home');
+      const [equipment, setEquipment] = useState('none');
+      const [sessionMinutes, setSessionMinutes] = useState(20);
+      const [daysPerWeek, setDaysPerWeek] = useState(4);
+      const [preferredActivities, setPreferredActivities] = useState(['walking', 'strength', 'stretching']);
+      const [jointConcerns, setJointConcerns] = useState([]);
+      const [lowImpactOnly, setLowImpactOnly] = useState(false);
+
+      const [completedDays, setCompletedDays] = useState({ 1: true, 3: true });
+
+      const toggleActivity = (act) => {
+        setPreferredActivities(prev => 
+          prev.includes(act) ? prev.filter(a => a !== act) : [...prev, act]
+        );
+      };
+
+      const toggleJointConcern = (joint) => {
+        setJointConcerns(prev => {
+          const exists = prev.includes(joint);
+          const next = exists ? prev.filter(j => j !== joint) : [...prev, joint];
+          if (next.length > 0) setLowImpactOnly(true);
+          return next;
+        });
+      };
+
+      const totalProjectedMinutes = sessionMinutes * daysPerWeek;
+      const meetsWHOTarget = totalProjectedMinutes >= 150;
+
+      const scheduleDays = [
+        { dayNum: 1, name: 'Monday', type: 'Aerobic Walk & Posture Core', focus: 'Brisk Walk + Wall Push-Ups & Bird-Dog', mins: sessionMinutes },
+        { dayNum: 2, name: 'Tuesday', type: 'Lower Body Strength & Balance', focus: 'Chair Squats + Glute Bridges + Balance Drill', mins: sessionMinutes },
+        { dayNum: 3, name: 'Wednesday', type: 'Active Recovery & Spinal Flow', focus: 'Cat-Cow + Gentle Walk & Hip Mobility', mins: Math.min(20, sessionMinutes) },
+        { dayNum: 4, name: 'Thursday', type: 'Aerobic Pace & Pulling Strength', focus: 'Brisk Intervals + Band Rows & Plank Holds', mins: sessionMinutes },
+        { dayNum: 5, name: 'Friday', type: 'Full Body Functional Movement', focus: 'Chair Squats + Wall Push-Ups + Tandem Balance', mins: sessionMinutes },
+        { dayNum: 6, name: 'Saturday', type: 'Recreational Movement of Choice', focus: 'Nature Walk, Cycling, Swimming or Dancing', mins: sessionMinutes + 10 },
+        { dayNum: 7, name: 'Sunday', type: 'Gentle Rest & Breathwork', focus: 'Full Body Restorative Stretches & Deep Breathing', mins: 15 }
+      ].slice(0, Math.max(3, daysPerWeek));
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-teal-800 bg-teal-100 px-3 py-1 rounded-full">
+              Safe & Adaptable Physical Movement
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Interactive Exercise Planner
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Tailored exercise recommendations designed for longevity, joint safety, and sustainable weekly consistency. Aligned with WHO guidelines: 150–300 minutes of moderate activity weekly plus 2 days of strength.
+            </p>
+          </div>
+
+          {/* EMERGENCY STOP NOTICE */}
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-900 flex items-center gap-3 shadow-xs">
+            <span className="text-red-600 text-xl shrink-0"><IconAlert /></span>
+            <p className="text-xs leading-relaxed">
+              <strong>Safety Cue:</strong> Always stop immediately if you experience sharp joint pain, chest tightness, dizziness, nausea, or shortness of breath. Exercise should be gently challenging, never agonizing.
+            </p>
+          </div>
+
+          {/* INTERACTIVE PLANNER INPUTS */}
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8 no-print">
+            <h2 className="text-xl font-bold text-slate-900 font-heading border-b border-slate-100 pb-4">
+              Customize Your Movement Routine
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Current Fitness Level</label>
+                <select
+                  value={fitnessLevel}
+                  onChange={(e) => setFitnessLevel(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                >
+                  <option value="beginner">Beginner (Returning or brand new to exercise)</option>
+                  <option value="intermediate">Intermediate (Active 2–3 times a week)</option>
+                  <option value="advanced">Advanced (Consistent regular training)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Age Group</label>
+                <select
+                  value={ageGroup}
+                  onChange={(e) => setAgeGroup(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                >
+                  <option value="adult">Adult (18–64 years)</option>
+                  <option value="older_adult">Older Adult (65+ years: includes balance & fall prevention)</option>
+                  <option value="teen">Teen / Young Adult (13–17 years)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Primary Fitness Goal</label>
+                <select
+                  value={exerciseGoal}
+                  onChange={(e) => setExerciseGoal(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                >
+                  <option value="general_health">General Health & Well-being</option>
+                  <option value="stamina">Stamina & Cardiovascular Endurance</option>
+                  <option value="strength">Functional Strength & Muscle Tone</option>
+                  <option value="flexibility">Flexibility & Spinal Mobility</option>
+                  <option value="balance">Balance & Fall Prevention</option>
+                  <option value="stress_relief">Stress Relief & Restorative Energy</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Primary Location</label>
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                >
+                  <option value="home">Home (Living room / Bedroom)</option>
+                  <option value="outdoors">Outdoors (Parks, Neighborhood paths)</option>
+                  <option value="office">Office / Desk Area</option>
+                  <option value="gym">Gym / Community Fitness Center</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Available Equipment</label>
+                <select
+                  value={equipment}
+                  onChange={(e) => setEquipment(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                >
+                  <option value="none">None (Zero equipment / Bodyweight)</option>
+                  <option value="mat">Yoga Mat / Towel Only</option>
+                  <option value="bands">Resistance Bands & Mat</option>
+                  <option value="dumbbells">Light Dumbbells or Water Bottles</option>
+                  <option value="bicycle">Stationary Bicycle / Cycle</option>
+                  <option value="full_gym">Full Gym Access</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Time Available per Session: <span className="text-brand-green font-extrabold">{sessionMinutes} mins</span>
+                </label>
+                <div className="flex gap-2">
+                  {[10, 15, 20, 30, 45].map(mins => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setSessionMinutes(mins)}
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg border transition ${
+                        sessionMinutes === mins
+                          ? 'bg-brand-green text-white border-brand-green'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Days per week slider */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                <span>Days Available Per Week:</span>
+                <span className="text-brand-green text-sm">{daysPerWeek} Days / Week</span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                value={daysPerWeek}
+                onChange={(e) => setDaysPerWeek(parseInt(e.target.value, 10))}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>1 Day</span>
+                <span>3 Days</span>
+                <span>5 Days</span>
+                <span>7 Days</span>
+              </div>
+            </div>
+
+            {/* Joint Concerns & Low Impact Toggle */}
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <label className="block text-xs font-bold text-slate-700">Joint or Mobility Limitations (Select if applicable)</label>
+              <div className="flex flex-wrap gap-2">
+                {['Knee Sensitivity', 'Lower Back Discomfort', 'Shoulder Stiffness', 'Neck Tension', 'Balance Concerns'].map(joint => (
+                  <button
+                    key={joint}
+                    type="button"
+                    onClick={() => toggleJointConcern(joint)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                      jointConcerns.includes(joint)
+                        ? 'bg-amber-100 text-amber-900 border-amber-300'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {joint}
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-2">
+                <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={lowImpactOnly}
+                    onChange={(e) => setLowImpactOnly(e.target.checked)}
+                    className="w-4 h-4 text-brand-green rounded"
+                  />
+                  <span>Prioritize Low-Impact Exercises (No jumping, zero knee pounding, joint-gentle)</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          {/* WEEKLY ACTIVITY TARGET PROJECTION SUMMARY */}
+          <div className="bg-gradient-to-br from-emerald-900 to-teal-900 text-white p-6 sm:p-8 rounded-3xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                WHO Evidence Standards
+              </span>
+              <h3 className="text-2xl font-bold font-heading">
+                Weekly Volume: {totalProjectedMinutes} Minutes Planned
+              </h3>
+              <p className="text-xs text-emerald-100 max-w-xl leading-relaxed">
+                {meetsWHOTarget ? (
+                  <span>✅ <strong>Excellent:</strong> Your planned {totalProjectedMinutes} weekly minutes comfortably fulfills the WHO evidence recommendation of at least 150 minutes of moderate aerobic activity.</span>
+                ) : (
+                  <span>💡 <strong>Progress Note:</strong> {totalProjectedMinutes} minutes is a great start! Doing some physical activity is always better than none. You can easily add two 10-minute walk bouts on other days to reach the 150-minute target.</span>
+                )}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                <span className="text-2xl font-extrabold text-amber-300 block">{daysPerWeek}</span>
+                <span className="text-[10px] text-emerald-100">Active Days</span>
+              </div>
+              <div className="text-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                <span className="text-2xl font-extrabold text-teal-200 block">2+</span>
+                <span className="text-[10px] text-emerald-100">Strength Days</span>
+              </div>
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2.5 rounded-xl bg-white text-emerald-950 font-bold text-xs hover:bg-emerald-100 transition shadow-sm"
+              >
+                Print Schedule
+              </button>
+            </div>
+          </div>
+
+          {/* GENERATED WEEKLY SCHEDULE & TRACKER */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                  Your Custom Weekly Schedule
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Tap "Mark Done" as you complete sessions to build your weekly streak.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {scheduleDays.map(day => {
+                const isDone = !!completedDays[day.dayNum];
+                return (
+                  <div 
+                    key={day.dayNum} 
+                    className={`exercise-day-card p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                      isDone 
+                        ? 'bg-emerald-50/70 border-emerald-300 shadow-xs' 
+                        : 'bg-white border-slate-200 shadow-sm'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Day {day.dayNum}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                          {day.mins} mins
+                        </span>
+                      </div>
+                      <h4 className="text-base font-bold text-slate-900 font-heading">
+                        {day.name}
+                      </h4>
+                      <div className="text-xs font-semibold text-brand-green">
+                        {day.type}
+                      </div>
+                      <p className="text-xs text-slate-600">
+                        {day.focus}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className={`text-[11px] font-bold ${isDone ? 'text-emerald-700' : 'text-slate-400'}`}>
+                        {isDone ? 'Completed' : 'Planned'}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setCompletedDays(prev => ({ ...prev, [day.dayNum]: !prev[day.dayNum] }));
+                          if (!isDone) {
+                            setAerobicMinutesLogged(prev => prev + day.mins);
+                            showToast(`Logged ${day.mins} minutes of physical activity!`);
+                          }
+                        }}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition ${
+                          isDone 
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {isDone ? '✓ Done' : 'Mark Done'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* EXERCISE LIBRARY & STEP-BY-STEP INSTRUCTIONS */}
+          <div className="space-y-8 pt-6">
+            <div className="border-b border-slate-200 pb-4">
+              <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                Safe Biomechanics Library
+              </span>
+              <h3 className="text-2xl font-bold text-slate-900 font-heading mt-2">
+                Step-by-Step Exercise Guides & Variations
+              </h3>
+              <p className="text-xs text-slate-600 mt-1">
+                Every exercise features step-by-step form cues, common mistakes, easier regressions, harder progressions, and safety warnings.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {DATA.EXERCISES.map(ex => (
+                <div key={ex.id} className="printable-card bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-4">
+                  
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
+                        {ex.category}
+                      </span>
+                      <h4 className="text-lg font-bold text-slate-900 font-heading mt-1">
+                        {ex.name}
+                      </h4>
+                      <span className="text-xs text-slate-500 font-medium">Target: {ex.target}</span>
+                    </div>
+                  </div>
+
+                  {/* Purpose */}
+                  <p className="text-xs text-slate-700 leading-relaxed italic bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <strong>Purpose:</strong> {ex.purpose}
+                  </p>
+
+                  {/* Step-by-Step Instructions */}
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-800 block">Step-by-Step Instructions:</span>
+                    <ol className="list-decimal list-inside space-y-1 text-xs text-slate-600">
+                      {ex.instructions.map((step, idx) => (
+                        <li key={idx} className="leading-relaxed">{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  {/* Duration, Sets & Reps */}
+                  <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100 text-xs text-emerald-950 font-medium space-y-1">
+                    <div><strong>Dosage:</strong> {ex.duration}</div>
+                    <div><strong>Rest:</strong> {ex.rest}</div>
+                  </div>
+
+                  {/* Mistakes, Easier & Harder */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                      <strong className="text-slate-800 block mb-0.5">Easier Variation:</strong>
+                      <span className="text-slate-600">{ex.easier}</span>
+                    </div>
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                      <strong className="text-slate-800 block mb-0.5">Harder Progression:</strong>
+                      <span className="text-slate-600">{ex.harder}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 font-medium">
+                    <strong>Safety Notice:</strong> {ex.safetyCue}
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* WARM-UP & COOL-DOWN PROTOCOL */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🔥</span>
+                <h4 className="text-lg font-bold text-slate-900 font-heading">
+                  3-Minute Dynamic Warm-Up
+                </h4>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Before beginning any session, lubricate your synovial joints and raise core body temperature:
+              </p>
+              <ul className="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+                <li><strong>Gentle Shoulder Rolls:</strong> 10 rolls backward, 10 rolls forward.</li>
+                <li><strong>Torso Twists:</strong> 10 slow twists with arms relaxed at waist height.</li>
+                <li><strong>Heel-to-Toe Rockers:</strong> 15 rocks standing tall next to a wall.</li>
+                <li><strong>Rhythmic Marching:</strong> 60 seconds of gentle marching in place.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">❄️</span>
+                <h4 className="text-lg font-bold text-slate-900 font-heading">
+                  3-Minute Restorative Cool-Down
+                </h4>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Smoothly down-regulate heart rate and prevent post-exercise venous blood pooling:
+              </p>
+              <ul className="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+                <li><strong>Calf & Hamstring Stretch:</strong> Hold 20 seconds per side without bouncing.</li>
+                <li><strong>Chest & Doorway Opener:</strong> Expand ribcage for 30 seconds.</li>
+                <li><strong>Cat-Cow Spinal Flow:</strong> 5 gentle cycles on hands and knees or seated.</li>
+                <li><strong>Box Breathing:</strong> Inhale 4s, hold 4s, exhale 4s, hold 4s (3 rounds).</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 4. HEALTH TIPS & EDUCATION COMPONENT
+    // ==========================================
+    function HealthTipsTab({ showToast }) {
+      const [timerRunning, setTimerRunning] = useState(false);
+      const [timerSecondsLeft, setTimerSecondsLeft] = useState(300); // 5 minutes
+      const [activeSnackType, setActiveSnackType] = useState('desk'); // 'desk' | 'home' | 'commute'
+
+      // Interactive Myth Quiz State
+      const [quizAnswers, setQuizAnswers] = useState({});
+      const [showExplanations, setShowExplanations] = useState({});
+
+      // Healthy Habits Score Quiz State
+      const [habitQuizResponses, setHabitQuizResponses] = useState({});
+      const [showHabitScore, setShowHabitScore] = useState(false);
+
+      // Smart Swaps Category Filter
+      const [swapFilter, setSwapFilter] = useState('all');
+
+      // 5-Minute Movement Timer Hook
+      useEffect(() => {
+        let interval = null;
+        if (timerRunning && timerSecondsLeft > 0) {
+          interval = setInterval(() => {
+            setTimerSecondsLeft(prev => prev - 1);
+          }, 1000);
+        } else if (timerSecondsLeft === 0) {
+          setTimerRunning(false);
+          showToast('5-Minute Movement Break Complete! Stellar job energizing your body.');
+        }
+        return () => clearInterval(interval);
+      }, [timerRunning, timerSecondsLeft]);
+
+      const formatTimer = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      };
+
+      const handleQuizOption = (qId, optionIdx, isCorrect) => {
+        setQuizAnswers(prev => ({ ...prev, [qId]: optionIdx }));
+        setShowExplanations(prev => ({ ...prev, [qId]: true }));
+      };
+
+      const calculateHabitsScore = () => {
+        let total = 0;
+        Object.values(habitQuizResponses).forEach(val => {
+          total += parseInt(val, 10);
+        });
+        return total;
+      };
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              Verified Wellness Knowledge
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Health Education & Interactive Tools
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Practical guides on the balanced plate, smart swaps, label literacy, micro-movement breaks, and interactive myth-busting quizzes.
+            </p>
+          </div>
+
+          {/* 1. THE BALANCED PLATE INTERACTIVE VISUAL */}
+          <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
+            <div className="max-w-2xl">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Visual Nutrition Blueprint</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mt-1">
+                The Evidence-Based Balanced Plate
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+                Based on Harvard T.H. Chan Healthy Eating Plate and ICMR-NIN guidelines: a simple, proportion-based visual model that frees you from weighing food obsessively.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              {/* Visual Plate Representation */}
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="plate-circle relative">
+                  {/* Top-Left Half: Vegetables (1/3) */}
+                  <div className="absolute top-0 left-0 w-1/2 h-full bg-emerald-100 border-r border-slate-300 p-4 flex flex-col justify-center items-center text-center">
+                    <span className="text-2xl mb-1">🥦🥕</span>
+                    <span className="text-xs font-extrabold text-emerald-950 uppercase">1/2 Plate</span>
+                    <span className="text-[10px] font-bold text-emerald-800">Vegetables & Whole Fruits</span>
+                    <span className="text-[8px] text-emerald-700 leading-tight mt-1">Dark greens, salads, red/orange veggies</span>
+                  </div>
+
+                  {/* Top-Right Quarter: Whole Grains */}
+                  <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-amber-100 border-b border-slate-300 p-2 flex flex-col justify-center items-center text-center">
+                    <span className="text-xl mb-0.5">🌾🍚</span>
+                    <span className="text-[11px] font-extrabold text-amber-950 uppercase">1/4 Plate</span>
+                    <span className="text-[9px] font-bold text-amber-800">Whole Grains</span>
+                    <span className="text-[8px] text-amber-700 leading-tight">Brown rice, rotis, millets, oats</span>
+                  </div>
+
+                  {/* Bottom-Right Quarter: Proteins */}
+                  <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-blue-100 p-2 flex flex-col justify-center items-center text-center">
+                    <span className="text-xl mb-0.5">🫘🥚</span>
+                    <span className="text-[11px] font-extrabold text-blue-950 uppercase">1/4 Plate</span>
+                    <span className="text-[9px] font-bold text-blue-800">Protein Foods</span>
+                    <span className="text-[8px] text-blue-700 leading-tight">Dals, paneer, tofu, sprouts, fish, eggs</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Explanatory Cards */}
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <h4 className="font-bold text-sm text-emerald-950 mb-1">1/2 Vegetables & Fruits</h4>
+                  <p className="text-xs text-emerald-800 leading-relaxed">
+                    Color and variety are key: dark leafy greens (spinach, methi), orange/red (carrots, tomatoes), and cruciferous (cauliflower, cabbage). Prioritize whole fruits over fruit juices.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                  <h4 className="font-bold text-sm text-amber-950 mb-1">1/4 Whole Intact Grains</h4>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    Whole wheat, brown rice, ragi, jowar, and rolled oats have a gentle effect on blood sugar and insulin compared to refined white flour (maida) and white rice.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                  <h4 className="font-bold text-sm text-blue-950 mb-1">1/4 Quality Protein</h4>
+                  <p className="text-xs text-blue-800 leading-relaxed">
+                    Lentils, pulses, sprouted beans, low-fat paneer, tofu, fish, poultry, or eggs. Pair with seeds or nuts for complete amino acid profiles.
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-teal-50 border border-teal-100">
+                  <h4 className="font-bold text-sm text-teal-950 mb-1">Healthy Oils & Pure Water</h4>
+                  <p className="text-xs text-teal-800 leading-relaxed">
+                    Use cold-pressed mustard, peanut, or olive oil in moderation. Make plain water your default beverage; limit sugary sodas and packaged fruit beverages.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* 2. SMART SWAPS INTERACTIVE BROWSER */}
+          <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-3 py-1 rounded-full">
+                  Substitutions, Not Deprivation
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mt-2">
+                  Smart Daily Swaps
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Small nutrient-dense upgrades that elevate energy and satiety without sacrificing flavor.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {['all', 'drinks', 'grains', 'snacks', 'portions'].map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSwapFilter(cat)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition ${
+                      swapFilter === cat 
+                        ? 'bg-brand-green text-white' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              
+              {(swapFilter === 'all' || swapFilter === 'drinks') && (
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Beverages</span>
+                  <div className="text-xs text-red-600 line-through">Sugary Sodas / Packaged Juices</div>
+                  <div className="text-sm font-bold text-emerald-800">→ Mint Spiced Chaas (Buttermilk) or Infused Water</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Saves 35–45g of liquid refined sucrose and provides gut-friendly probiotics and electrolytes.
+                  </p>
+                </div>
+              )}
+
+              {(swapFilter === 'all' || swapFilter === 'grains') && (
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Grains</span>
+                  <div className="text-xs text-red-600 line-through">Refined White Flour (Maida)</div>
+                  <div className="text-sm font-bold text-emerald-800">→ 100% Whole Wheat or Jowar / Ragi Flour</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Preserves the grain germ and bran, tripling dietary fiber and delivering essential B-complex vitamins.
+                  </p>
+                </div>
+              )}
+
+              {(swapFilter === 'all' || swapFilter === 'snacks') && (
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Snacks</span>
+                  <div className="text-xs text-red-600 line-through">Deep-Fried Packaged Potato Chips</div>
+                  <div className="text-sm font-bold text-emerald-800">→ Dry Roasted Fox Nuts (Makhana) or Roasted Chana</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Provides crunch and satiety with 80% less saturated oil, plus magnesium, calcium, and plant protein.
+                  </p>
+                </div>
+              )}
+
+              {(swapFilter === 'all' || swapFilter === 'portions') && (
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Portions</span>
+                  <div className="text-xs text-red-600 line-through">Eating Mindlessly in Front of TV/Phone</div>
+                  <div className="text-sm font-bold text-emerald-800">→ Seated Plate Pacing with 20-Min Fullness Awareness</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Allows gut satiety hormones (CCK and PYY) to signal brain satiety, preventing unintentional overconsumption.
+                  </p>
+                </div>
+              )}
+
+            </div>
+          </section>
+
+          {/* 3. LABEL LITERACY & HYDRATION GUIDE */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Label Literacy */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2.5 py-1 rounded-full">
+                Consumer Savvy
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                Nutrition Label Literacy (The 5/20 Rule)
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Packaged food claims like "Natural" or "Healthy" are often marketing slogans. Learn how to decode the real Nutrition Facts panel:
+              </p>
+              <div className="space-y-2 text-xs text-slate-700">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">1. Serving Size Check:</strong> Always check how many servings are in the packet. A small bag often contains 2.5 servings!
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">2. The 5% / 20% %DV Rule:</strong> 5% Daily Value or less is LOW (ideal for added sugars, sodium, saturated fat). 20% Daily Value or more is HIGH (great for dietary fiber, calcium, iron).
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">3. Ingredients Order:</strong> Ingredients are listed in descending order by weight. If sugar, palm oil, or refined starch are in the first 3 items, it is an ultra-processed food.
+                </div>
+              </div>
+            </div>
+
+            {/* Hydration Science */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2.5 py-1 rounded-full">
+                Fluid Balance
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                Hydration Science & Urine Color Guide
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Water is your body’s primary solvent. It transports micronutrients, cushions joints, and regulates core temperature. Individual needs vary with heat, climate, and exercise volume.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs">
+                  <span className="w-6 h-6 rounded-full bg-yellow-100 border border-yellow-300 shrink-0"></span>
+                  <div>
+                    <strong className="text-slate-900">Pale Straw / Light Yellow:</strong> Optimal cellular hydration. Keep doing what you are doing!
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-amber-100 border border-amber-300 text-xs">
+                  <span className="w-6 h-6 rounded-full bg-amber-400 border border-amber-500 shrink-0"></span>
+                  <div>
+                    <strong className="text-slate-900">Dark Amber / Tea Color:</strong> Dehydrated. Drink a tall glass (250–300ml) of water immediately.
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                  <span className="w-6 h-6 rounded-full bg-white border border-slate-300 shrink-0"></span>
+                  <div>
+                    <strong className="text-slate-900">Completely Clear:</strong> You may be over-hydrating and flushing out essential electrolytes. Space out water intake.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          {/* 4. MOVEMENT SNACKS WITH 5-MINUTE INTERACTIVE TIMER */}
+          <section className="bg-gradient-to-br from-slate-900 to-teal-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs uppercase font-bold tracking-wider text-teal-300 bg-teal-900/60 px-3 py-1 rounded-full border border-teal-700">
+                  Micro-Workouts
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold font-heading mt-2">
+                  5-Minute "Movement Snacks"
+                </h2>
+                <p className="text-xs text-slate-300 mt-1">
+                  Sitting for 8+ hours? Break static posture with targeted micro-routines right at your desk, home, or during a commute.
+                </p>
+              </div>
+
+              {/* Interactive Timer Controls */}
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex items-center gap-4 shrink-0">
+                <div className="text-center">
+                  <span className="text-3xl font-mono font-extrabold text-teal-300 block">
+                    {formatTimer(timerSecondsLeft)}
+                  </span>
+                  <span className="text-[10px] text-slate-300 uppercase">Movement Timer</span>
+                </div>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setTimerRunning(!timerRunning)}
+                    className="w-full px-4 py-1.5 rounded-lg text-xs font-bold bg-teal-400 text-teal-950 hover:bg-teal-300 transition"
+                  >
+                    {timerRunning ? 'Pause' : 'Start 5m'}
+                  </button>
+                  <button
+                    onClick={() => { setTimerRunning(false); setTimerSecondsLeft(300); }}
+                    className="w-full px-4 py-1 rounded-lg text-[10px] font-semibold bg-white/15 text-white hover:bg-white/25 transition"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Movement Snack Selector */}
+            <div className="flex gap-2">
+              {[
+                { id: 'desk', label: '🪑 Desk Movement Snack' },
+                { id: 'home', label: '🏠 Living Room Snack' },
+                { id: 'commute', label: '🚶 Commute / Travel Snack' }
+              ].map(snack => (
+                <button
+                  key={snack.id}
+                  onClick={() => setActiveSnackType(snack.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    activeSnackType === snack.id
+                      ? 'bg-teal-500 text-slate-950 shadow-md'
+                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                  }`}
+                >
+                  {snack.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Snack Specific Steps */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {activeSnackType === 'desk' && [
+                { title: 'Minute 1: Seated Spinal Twists', desc: 'Sit tall, gently rotate torso right for 30s, then left for 30s.' },
+                { title: 'Minute 2: Desk Calf & Shin Raises', desc: 'Stand by desk, lift onto toes 15 times, then lift toes on heels 15 times.' },
+                { title: 'Minute 3: Scapular Wall Angels', desc: 'Stand against clear wall, slide elbows up and down to wake upper back.' },
+                { title: 'Minute 4 & 5: Deep Breathing & Chair Hinge', desc: 'Inhale deeply with chest proud, hinge forward from hips for hip relief.' }
+              ].map((step, idx) => (
+                <div key={idx} className="bg-white/10 p-4 rounded-xl border border-white/10 space-y-1">
+                  <h4 className="font-bold text-xs text-teal-300">{step.title}</h4>
+                  <p className="text-xs text-slate-300">{step.desc}</p>
+                </div>
+              ))}
+
+              {activeSnackType === 'home' && [
+                { title: 'Minute 1: Light Marching & Arm Swings', desc: 'March gently in place while rolling shoulders and breathing deeply.' },
+                { title: 'Minute 2: Couch/Chair Tap Squats', desc: 'Lightly tap the couch with your hips 12 times to activate thighs.' },
+                { title: 'Minute 3: Doorway Chest Openers', desc: 'Forearms on doorframe, step through gently for a restorative stretch.' },
+                { title: 'Minute 4 & 5: Floor Cat-Cow & Child’s Pose', desc: 'Mobilize vertebrae smoothly and rest in child’s pose for 60 seconds.' }
+              ].map((step, idx) => (
+                <div key={idx} className="bg-white/10 p-4 rounded-xl border border-white/10 space-y-1">
+                  <h4 className="font-bold text-xs text-teal-300">{step.title}</h4>
+                  <p className="text-xs text-slate-300">{step.desc}</p>
+                </div>
+              ))}
+
+              {activeSnackType === 'commute' && [
+                { title: 'Minute 1: Standing Ankle Pumps', desc: 'Alternate lifting toes and heels to stimulate lower leg circulation.' },
+                { title: 'Minute 2: Standing Glute Squeezes', desc: 'Stand tall with weight centered, contract glutes for 5-second pulses.' },
+                { title: 'Minute 3: Neck Trapezius Rolls', desc: 'Roll shoulders up, back, and down to release travel bag tightness.' },
+                { title: 'Minute 4 & 5: Extended Exhale Breath', desc: 'Inhale for 4 seconds, exhale smoothly for 6 seconds to calm nervous system.' }
+              ].map((step, idx) => (
+                <div key={idx} className="bg-white/10 p-4 rounded-xl border border-white/10 space-y-1">
+                  <h4 className="font-bold text-xs text-teal-300">{step.title}</h4>
+                  <p className="text-xs text-slate-300">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 5. INTERACTIVE MYTH VS. FACT QUIZ (8 Questions) */}
+          <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-brand-green bg-emerald-100 px-3 py-1 rounded-full">
+                Interactive Science Check
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mt-2">
+                Myth vs. Fact Quiz
+              </h2>
+              <p className="text-xs text-slate-600 mt-1">
+                Test your knowledge against common wellness myths and read the underlying scientific evidence.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {DATA.MYTHS_QUIZ.map((quiz, qIdx) => {
+                const selectedOpt = quizAnswers[quiz.id];
+                const isAnswered = selectedOpt !== undefined;
+                const isCorrect = isAnswered && quiz.options[selectedOpt].isCorrect;
+
+                return (
+                  <div key={quiz.id} className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
+                    <div className="font-bold text-sm text-slate-900 leading-snug">
+                      Question {qIdx + 1}: {quiz.question}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {quiz.options.map((opt, oIdx) => {
+                        const isThisSelected = selectedOpt === oIdx;
+                        let btnStyle = 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100';
+                        if (isThisSelected) {
+                          btnStyle = opt.isCorrect ? 'bg-emerald-600 text-white font-bold' : 'bg-red-600 text-white font-bold';
+                        }
+                        return (
+                          <button
+                            key={oIdx}
+                            onClick={() => handleQuizOption(quiz.id, oIdx, opt.isCorrect)}
+                            className={`p-3 rounded-xl border text-xs text-left transition ${btnStyle}`}
+                          >
+                            {opt.text}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {showExplanations[quiz.id] && (
+                      <div className={`p-3.5 rounded-xl text-xs leading-relaxed mt-2 border ${
+                        isCorrect ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-amber-50 text-amber-900 border-amber-200'
+                      }`}>
+                        <strong>{isCorrect ? '✓ Correct Answer!' : '💡 Evidence Note:'}</strong> {quiz.explanation}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 6. HEALTHY HABITS SCORE QUIZ (10 Questions, Supportive) */}
+          <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-teal-800 bg-teal-100 px-3 py-1 rounded-full">
+                Self-Compassionate Check-In
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading mt-2">
+                10-Question Healthy Habits Score
+              </h2>
+              <p className="text-xs text-slate-600 mt-1">
+                Reflect on your current routine across movement, nutrition, sleep, hydration, and stress. No shaming or guilt—just practical insights.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {DATA.HABITS_QUIZ.map((q, idx) => (
+                <div key={q.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>{q.category}</span>
+                    <span>#{idx + 1} of 10</span>
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900">
+                    {q.question}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {q.options.map((opt, oIdx) => {
+                      const isSelected = habitQuizResponses[q.id] === opt.score;
+                      return (
+                        <button
+                          key={oIdx}
+                          onClick={() => setHabitQuizResponses(prev => ({ ...prev, [q.id]: opt.score }))}
+                          className={`p-2.5 rounded-xl border text-xs text-left transition ${
+                            isSelected 
+                              ? 'bg-brand-green text-white font-bold border-brand-green' 
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <div className="pt-4 text-center">
+                <button
+                  onClick={() => setShowHabitScore(true)}
+                  className="px-8 py-3.5 rounded-xl text-sm font-bold bg-brand-green text-white hover:bg-brand-deep transition shadow-md"
+                >
+                  Calculate My Habits Score & Advice
+                </button>
+              </div>
+
+              {showHabitScore && (
+                <div className="p-6 sm:p-8 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">🌟</span>
+                    <div>
+                      <h3 className="text-2xl font-bold font-heading">
+                        Your Score: {calculateHabitsScore()} / 30
+                      </h3>
+                      <p className="text-xs text-emerald-800 font-medium">
+                        Every small choice counts toward lifelong resilience.
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-emerald-900 leading-relaxed">
+                    {calculateHabitsScore() >= 24 ? (
+                      <span><strong>Outstanding Balance:</strong> You have established strong, evidence-based lifestyle anchors. Focus on maintaining consistency and enjoying your daily meals and active moments!</span>
+                    ) : calculateHabitsScore() >= 15 ? (
+                      <span><strong>Solid Foundation:</strong> You already engage in several positive health rituals. Pick just one area (such as an extra glass of water or 10-minute walk after lunch) to gently expand this week.</span>
+                    ) : (
+                      <span><strong>Bright Opportunities:</strong> Remember that lifelong health is built through tiny micro-steps, not overnight perfection. Choose one gentle ritual from our "Start with One Habit" module to practice this week.</span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* 7. DOWNLOADABLE / PRINTABLE ONE-PAGE "WEEKLY WELLNESS CHECKLIST" */}
+          <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6 printable-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+              <div>
+                <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                  Printable Companion
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading mt-2">
+                  Weekly Wellness Checklist
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Keep this on your refrigerator or workspace desk to track your core daily wellness anchors.
+                </p>
+              </div>
+
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-green hover:bg-brand-deep transition shadow-xs flex items-center gap-2 shrink-0"
+              >
+                <IconPrint />
+                <span>Print Checklist (1-Page)</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+                <thead className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                  <tr>
+                    <th className="p-3">Core Daily Anchor</th>
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                      <th key={d} className="p-3 text-center">{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[
+                    '🥗 Added colorful vegetables / fruit to 2 meals',
+                    '💧 Drank 6–8 glasses of plain water / herbal tea',
+                    '🚶 Accumulated 20–30 mins of moderate movement (or brisk walk)',
+                    '🧘 Took a 5-minute desk stretch / posture break',
+                    '💪 Completed bodyweight or resistance strength session (2x/wk)',
+                    '🌙 7–8 hours restful sleep with consistent bedtime',
+                    '🍽️ Practiced mindful eating without distracting screens'
+                  ].map((anchor, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="p-3 font-semibold text-slate-800">{anchor}</td>
+                      {[0, 1, 2, 3, 4, 5, 6].map(d => (
+                        <td key={d} className="p-3 text-center">
+                          <input type="checkbox" className="w-4 h-4 text-brand-green rounded" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 5. MY PROGRESS DASHBOARD COMPONENT
+    // ==========================================
+    function ProgressTab({
+      aerobicMinutesLogged,
+      setAerobicMinutesLogged,
+      strengthDaysLogged,
+      setStrengthDaysLogged,
+      waterGlassesLogged,
+      setWaterGlassesLogged,
+      weeklyUserGoal,
+      setWeeklyUserGoal,
+      completedHabitsStreak,
+      setCompletedHabitsStreak,
+      selectedHabit,
+      setConfirmResetOpen,
+      showToast
+    }) {
+      const [editingGoal, setEditingGoal] = useState(false);
+      const [tempGoal, setTempGoal] = useState(weeklyUserGoal);
+
+      const aerobicTarget = 150;
+      const aerobicPercent = Math.min(100, Math.round((aerobicMinutesLogged / aerobicTarget) * 100));
+
+      const strengthTarget = 2;
+      const strengthPercent = Math.min(100, Math.round((strengthDaysLogged / strengthTarget) * 100));
+
+      const handleSaveGoal = () => {
+        setWeeklyUserGoal(tempGoal);
+        setEditingGoal(false);
+        showToast('Weekly personal goal updated!');
+      };
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              Body-Respectful Tracking
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              My Wellness Progress
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Track consistency, energy, and stamina rather than obsessing over a scale. Health is celebrated through how you feel, how you sleep, and how you move.
+            </p>
+          </div>
+
+          {/* PROGRESS METRICS CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Aerobic Minutes Tracker */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Weekly Aerobic Minutes
+                </div>
+                <div className="text-3xl font-extrabold text-brand-green font-heading">
+                  {aerobicMinutesLogged} <span className="text-xs text-slate-500 font-normal">/ {aerobicTarget} mins</span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-3">
+                  <div 
+                    className="bg-brand-green h-full rounded-full transition-all duration-500"
+                    style={{ width: `${aerobicPercent}%` }}
+                  />
+                </div>
+                <span className="text-[11px] text-slate-500 mt-2 block">
+                  {aerobicPercent >= 100 ? '🎉 150m WHO Target Met!' : `${aerobicTarget - aerobicMinutesLogged} mins to goal`}
+                </span>
+              </div>
+              <div className="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => { setAerobicMinutesLogged(prev => prev + 10); showToast('+10 minutes logged!'); }}
+                  className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 text-brand-green hover:bg-emerald-100 transition text-center"
+                >
+                  +10m Walk
+                </button>
+                <button
+                  onClick={() => { setAerobicMinutesLogged(prev => prev + 30); showToast('+30 minutes logged!'); }}
+                  className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 text-brand-green hover:bg-emerald-100 transition text-center"
+                >
+                  +30m Workout
+                </button>
+              </div>
+            </div>
+
+            {/* Strength Training Days Tracker */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Strength Days Completed
+                </div>
+                <div className="text-3xl font-extrabold text-blue-700 font-heading">
+                  {strengthDaysLogged} <span className="text-xs text-slate-500 font-normal">/ {strengthTarget} days</span>
+                </div>
+                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-3">
+                  <div 
+                    className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${strengthPercent}%` }}
+                  />
+                </div>
+                <span className="text-[11px] text-slate-500 mt-2 block">
+                  {strengthDaysLogged >= 2 ? '✅ Major muscle groups stimulated!' : 'Target: 2 non-consecutive days'}
+                </span>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => { setStrengthDaysLogged(prev => prev + 1); showToast('Strength session logged!'); }}
+                  className="w-full py-1.5 text-xs font-bold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center"
+                >
+                  + Log Strength Session
+                </button>
+              </div>
+            </div>
+
+            {/* Habit Streak Card */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Active Habit Streak
+                </div>
+                <div className="text-3xl font-extrabold text-amber-600 font-heading">
+                  {completedHabitsStreak} <span className="text-xs text-slate-500 font-normal">Days</span>
+                </div>
+                <div className="mt-2 text-xs font-semibold text-slate-800">
+                  Focus: {selectedHabit.title}
+                </div>
+                <span className="text-[11px] text-slate-500 leading-tight block mt-1">
+                  Consistent micro-habits compound into lifelong vitality.
+                </span>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => { setCompletedHabitsStreak(prev => prev + 1); showToast('Logged habit for today!'); }}
+                  className="w-full py-1.5 text-xs font-bold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 transition text-center"
+                >
+                  + Complete Today’s Habit
+                </button>
+              </div>
+            </div>
+
+            {/* Optional Water Tracker */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Hydration Check (Optional)
+                </div>
+                <div className="text-3xl font-extrabold text-teal-600 font-heading">
+                  {waterGlassesLogged} <span className="text-xs text-slate-500 font-normal">Glasses (250ml)</span>
+                </div>
+                <span className="text-[11px] text-slate-500 leading-tight block mt-2">
+                  Total approx: {(waterGlassesLogged * 0.25).toFixed(1)} Liters today
+                </span>
+              </div>
+              <div className="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => setWaterGlassesLogged(prev => Math.max(0, prev - 1))}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
+                >
+                  -
+                </button>
+                <button
+                  onClick={() => { setWaterGlassesLogged(prev => prev + 1); showToast('+1 glass of water logged!'); }}
+                  className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 text-center"
+                >
+                  + Add Glass
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* SET ONE WEEKLY GOAL CARD */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                  Weekly Focus
+                </span>
+                <h3 className="text-xl font-bold text-slate-900 font-heading mt-1">
+                  My Single Weekly Focus Goal
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Focusing on just one clear behavioral goal drastically increases long-term adherence.
+                </p>
+              </div>
+
+              {!editingGoal ? (
+                <button
+                  onClick={() => { setEditingGoal(true); setTempGoal(weeklyUserGoal); }}
+                  className="px-4 py-2 text-xs font-bold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Edit Goal
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingGoal(false)}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveGoal}
+                    className="px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-green text-white hover:bg-brand-deep"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!editingGoal ? (
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-emerald-950 font-bold text-base flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <span>"{weeklyUserGoal || 'Set a small personal goal for this week...'}"</span>
+              </div>
+            ) : (
+              <div className="pt-2">
+                <input
+                  type="text"
+                  value={tempGoal}
+                  onChange={(e) => setTempGoal(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                  placeholder="e.g. Walk 15 minutes after dinner on 4 weekdays"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* SIMPLE STREAK CALENDAR */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 font-heading">
+              Current Month Consistency Calendar
+            </h3>
+            <p className="text-xs text-slate-500">
+              Green badges highlight days with logged movement or healthy habit rituals.
+            </p>
+
+            <div className="grid grid-cols-7 gap-2 text-center text-xs pt-2">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                <div key={d} className="font-bold text-slate-400 py-1">{d}</div>
+              ))}
+              {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+                const isActive = day % 2 === 0 || day % 3 === 0 || day === 7 || day === 15;
+                return (
+                  <div
+                    key={day}
+                    className={`py-2.5 rounded-xl font-bold transition ${
+                      isActive 
+                        ? 'bg-brand-green text-white shadow-xs' 
+                        : 'bg-slate-50 text-slate-400'
+                    }`}
+                  >
+                    {day}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* DATA PRIVACY & RESET OPTION */}
+          <div className="p-6 rounded-3xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="font-bold text-sm text-slate-900">Your Data Belongs to You</h4>
+              <p className="text-xs text-slate-600 mt-0.5">
+                All logs exist solely in your browser's localStorage. You can erase all data with one click at any time.
+              </p>
+            </div>
+            <button
+              onClick={() => setConfirmResetOpen(true)}
+              className="px-4 py-2 text-xs font-bold rounded-xl text-red-600 hover:bg-red-50 border border-red-200 transition shrink-0"
+            >
+              Clear All Saved Data
+            </button>
+          </div>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 6. ABOUT CREATORS COMPONENT
+    // ==========================================
+    function AboutCreatorsTab() {
+      const creators = DATA.CREATORS;
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              Leadership & Scientific Vision
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Meet the Creators
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Healthy Living Hub was envisioned and engineered by three passionate wellness researchers and technologists dedicated to democratizing reliable, evidence-based lifestyle tools.
+            </p>
+          </div>
+
+          {/* Creators Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {creators.map((c, idx) => (
+              <div key={idx} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between space-y-6 hlh-card">
+                <div className="space-y-4">
+                  
+                  {/* Avatar Placeholder with Initials */}
+                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${c.avatarColor} text-white font-extrabold text-2xl flex items-center justify-center shadow-lg font-heading`}>
+                    {c.initials}
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-brand-green bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      {c.badge}
+                    </span>
+                    <h3 className="text-xl font-bold text-slate-900 font-heading mt-2">
+                      {c.name}
+                    </h3>
+                    <div className="text-xs font-semibold text-slate-500">
+                      {c.role}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {c.bio}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-medium">
+                  Healthy Living Hub Core Team
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* SHARED VISION STATEMENT CARD */}
+          <div className="bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl text-center max-w-4xl mx-auto space-y-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+              Our Guiding Purpose
+            </span>
+            <h3 className="text-xl sm:text-3xl font-extrabold font-heading leading-snug">
+              "{DATA.SHARED_VISION}"
+            </h3>
+            <p className="text-xs text-emerald-100 max-w-xl mx-auto leading-relaxed">
+              We believe that health information should be completely transparent, respectful of individual bodily autonomy, culturally adaptable, and freely accessible to everyone without paywalls or restrictive dogma.
+            </p>
+          </div>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 7. EVIDENCE & REFERENCES COMPONENT
+    // ==========================================
+    function ReferencesTab() {
+      const refs = DATA.REFERENCES;
+
+      return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs uppercase font-bold tracking-wider text-teal-800 bg-teal-100 px-3 py-1 rounded-full">
+              Authoritative Scientific Foundations
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Evidence & References
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              Healthy Living Hub synthesizes peer-reviewed guidelines from leading international public health institutions. Below are our foundational references:
+            </p>
+          </div>
+
+          {/* Core Guidelines List */}
+          <div className="space-y-6">
+            {refs.map((ref, idx) => (
+              <div key={idx} className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 font-heading">
+                    {ref.title}
+                  </h3>
+                  <span className="text-xs font-semibold text-brand-green">
+                    {ref.organization}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {ref.summary}
+                </p>
+
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <span className="text-slate-700">
+                    <strong>Core Takeaway:</strong> {ref.keyPoint}
+                  </span>
+                  <a
+                    href={ref.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-brand-teal hover:underline shrink-0"
+                  >
+                    View Official Publication ↗
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Population Guidance Adaptation Note */}
+          <div className="p-6 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs leading-relaxed space-y-2">
+            <h4 className="font-bold text-sm text-amber-900">
+              Adapting Population Guidance to Individual Lives
+            </h4>
+            <p>
+              National and international nutritional guidelines are formulated for population-level public health targets. Real humans have unique metabolic rates, cultural food traditions, budgets, work schedules, and medical histories. Healthy Living Hub encourages you to treat these guidelines as a flexible framework, adapting them in partnership with your registered dietitian or primary physician.
+            </p>
+          </div>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 8. CONTACT COMPONENT
+    // ==========================================
+    function ContactTab({ showToast }) {
+      const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        topic: 'nutrition_feedback',
+        message: ''
+      });
+      const [submitted, setSubmitted] = useState(false);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formData.name || !formData.email || !formData.message) {
+          alert('Please fill out all fields before submitting.');
+          return;
+        }
+
+        // Save inquiry in localStorage for simulation
+        try {
+          const inquiries = JSON.parse(localStorage.getItem('hlh_inquiries') || '[]');
+          inquiries.push({ ...formData, timestamp: new Date().toISOString() });
+          localStorage.setItem('hlh_inquiries', JSON.stringify(inquiries));
+        } catch(err) {}
+
+        setSubmitted(true);
+        showToast('Thank you! Your feedback has been recorded.');
+      };
+
+      return (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+          
+          <div className="text-center">
+            <span className="text-xs uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              Get in Touch
+            </span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-heading mt-2">
+              Contact the Creation Team
+            </h1>
+            <p className="text-base text-slate-600 mt-2">
+              We welcome suggestions, bug reports, and academic inquiries from our community.
+            </p>
+          </div>
+
+          {/* CRITICAL NON-MEDICAL NOTICE */}
+          <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 text-amber-900 flex items-start gap-3 shadow-xs">
+            <span className="text-amber-600 text-xl shrink-0 mt-0.5"><IconAlert /></span>
+            <p className="text-xs leading-relaxed">
+              <strong>Medical Disclaimer:</strong> The Healthy Living Hub creation team provides educational wellness tools and is strictly unable to provide personal medical diagnoses, clinical prescription diets, or individualized treatment plans. For medical concerns, please consult a licensed healthcare professional.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm">
+            {submitted ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-3xl">
+                  ✓
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 font-heading">
+                  Message Successfully Received
+                </h3>
+                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  Thank you for reaching out, <strong>{formData.name}</strong>. Sanskruti, Shubham, and Samiksha appreciate your input and will review your note.
+                </p>
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setFormData({ name: '', email: '', topic: 'nutrition_feedback', message: '' });
+                  }}
+                  className="px-6 py-2.5 rounded-xl font-bold text-xs bg-brand-green text-white hover:bg-brand-deep transition"
+                >
+                  Send Another Note
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Your Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                      placeholder="e.g. Aditi Sharma"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Your Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                      placeholder="aditi@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Topic of Inquiry</label>
+                  <select
+                    value={formData.topic}
+                    onChange={(e) => setFormData({...formData, topic: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                  >
+                    <option value="nutrition_feedback">Nutrition Chart Feedback or Recipe Suggestion</option>
+                    <option value="exercise_feedback">Exercise Planner Suggestion or Accessibility Feedback</option>
+                    <option value="bug_report">Website Bug Report / Technical Feedback</option>
+                    <option value="general_inquiry">General Inquiry / Educational Collaboration</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Your Message</label>
+                  <textarea
+                    rows="5"
+                    required
+                    value={formData.message}
+                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                    placeholder="Share your thoughts, questions, or ideas with the team..."
+                  ></textarea>
+                </div>
+
+                <div className="pt-2 text-right">
+                  <button
+                    type="submit"
+                    className="px-8 py-3 rounded-xl font-bold text-sm bg-brand-green text-white hover:bg-brand-deep transition shadow-md"
+                  >
+                    Send Message
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+        </div>
+      );
+    }
+
+    // Mount React App to DOM
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
